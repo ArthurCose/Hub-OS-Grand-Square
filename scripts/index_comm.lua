@@ -1,8 +1,9 @@
 --- Custom Data:
 
-local NAME = "Grand Square"                             -- This server's name (currently unused, but may be used in the future)
+local NAME =
+"Grand Square"                                          -- This server's name (currently unused, but may be used in the future)
 local MESSAGE = "Visit Grand Square!\nPvP and kitties!" -- Dialog for the ampstr
-local WARP_ADDRESS = "hubos.konstinople.dev:8018"       -- What address should the warp link to (port is ignored)
+local WARP_ADDRESS = "hubos.konstinople.dev"            -- What address should the warp link to (port is ignored)
 local WARP_DATA = ""                                    -- What data should the warp from the index contain
 
 --- Script (do not modify):

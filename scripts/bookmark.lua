@@ -79,8 +79,7 @@ Net:on("actor_interaction", function(event)
       return
     end
 
-    Net.refer_server(event.player_id, SERVER_NAME, "hubos.konstinople.dev")
-
+    Net.refer_server(event.player_id, SERVER_NAME, "hubos.konstinople.dev:8018")
 
     Async.await(Ampstr.message_player_async(event.player_id, "Yippee!"))
 
