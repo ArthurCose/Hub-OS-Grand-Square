@@ -174,7 +174,7 @@
     <property name="Name" value="Cat"/>
    </properties>
   </object>
-  <object id="49" gid="65" x="696.5" y="440" width="33" height="54"/>
+  <object id="49" gid="65" x="696" y="440" width="34" height="54"/>
   <object id="50" gid="69" x="455" y="363" width="48" height="48"/>
   <object id="51" gid="70" x="488" y="363" width="48" height="48"/>
   <object id="52" gid="71" x="516" y="363" width="48" height="48"/>
