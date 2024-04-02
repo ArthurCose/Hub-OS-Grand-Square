@@ -165,6 +165,7 @@ function show_post(player_id, board_name, post_id)
 end
 
 send_post_form = Async.create_function(function(player_id, player_state, board)
+  Net.message_player(player_id, "Message:")
   local text = Async.await(Async.prompt_player(player_id, board.custom_properties["Character Limit"]))
 
   if contains_only_whitespace(text) then
