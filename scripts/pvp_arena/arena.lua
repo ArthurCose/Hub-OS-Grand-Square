@@ -135,7 +135,7 @@ function Arena:try_start()
   if self.ignore_teams then
     can_start = can_start and #self.red_players + #self.blue_players > 0
   else
-    can_start = can_start and self.red_players > 0 and #self.blue_players > 0
+    can_start = can_start and #self.red_players > 0 and #self.blue_players > 0
   end
 
   if not can_start then
