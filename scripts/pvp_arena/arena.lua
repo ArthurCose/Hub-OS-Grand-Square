@@ -8,15 +8,17 @@ end
 
 ---@class Arena
 ---@field area_id string
+---@field encounter_path string
+---@field ignore_teams? boolean
 ---@field x number
 ---@field y number
 ---@field z number
 ---@field center_x number
 ---@field center_y number
 ---@field fight_active boolean
----@field red_players string[]
----@field blue_players string[]
----@field countdown_bots string[]
+---@field red_players Net.ActorId[]
+---@field blue_players Net.ActorId[]
+---@field countdown_bots Net.ActorId[]
 ---@field cancel_countdown_callback? function
 local Arena = {}
 Arena.__index = Arena
@@ -65,11 +67,24 @@ function Arena:new(area_id, tile_x, tile_y, tile_z)
   return arena
 end
 
+function Arena:set_encounter_package(path)
+  self.encounter_path = path
+end
+
+function Arena:set_ignore_teams(ignore_teams)
+  self.ignore_teams = ignore_teams
+end
+
 function Arena:try_reset()
   -- resolve if we should reset the arena for new players
-  local should_reset =
-      (not self.fight_active and (#self.red_players == 0 or #self.blue_players == 0)) or
-      (self.fight_active and (#self.red_players + #self.blue_players == 0))
+  local should_reset
+
+  if self.ignore_teams then
+    should_reset = #self.red_players + #self.blue_players == 0
+  else
+    should_reset = (not self.fight_active and (#self.red_players == 0 or #self.blue_players == 0)) or
+        (self.fight_active and (#self.red_players + #self.blue_players == 0))
+  end
 
   if not should_reset then
     return
@@ -94,18 +109,20 @@ function Arena:try_reset()
 end
 
 ---@param self Arena
-local function start_encounter(self)
+---@param red_players Net.ActorId
+---@param blue_players Net.ActorId
+local function start_encounter(self, red_players, blue_players)
   local player_ids = {}
 
-  for _, player_id in ipairs(self.red_players) do
+  for _, player_id in ipairs(red_players) do
     player_ids[#player_ids + 1] = player_id
   end
 
-  for _, player_id in ipairs(self.blue_players) do
+  for _, player_id in ipairs(blue_players) do
     player_ids[#player_ids + 1] = player_id
   end
 
-  Net.initiate_netplay(player_ids, "/server/assets/encounters/pvp_arena.zip", {
+  Net.initiate_netplay(player_ids, self.encounter_path, {
     player_count = #player_ids,
     red_player_count = #self.red_players,
   })
@@ -113,8 +130,13 @@ end
 
 function Arena:try_start()
   -- resolve if we should reset the arena for new players
-  local can_start =
-      not self.fight_active and #self.red_players > 0 and #self.blue_players > 0 and not self.cancel_countdown_callback
+  local can_start = not self.fight_active and not self.cancel_countdown_callback
+
+  if self.ignore_teams then
+    can_start = can_start and #self.red_players + #self.blue_players > 0
+  else
+    can_start = can_start and self.red_players > 0 and #self.blue_players > 0
+  end
 
   if not can_start then
     return
@@ -142,6 +164,10 @@ function Arena:try_start()
       return
     end
 
+    -- lock in players
+    local red_players = self.red_players
+    local blue_players = self.blue_players
+
     Net.synchronize(function()
       -- fight! instead of the timer
       for _, bot_id in ipairs(self.countdown_bots) do
@@ -149,7 +175,7 @@ function Arena:try_start()
       end
 
       -- make players face opponents
-      for _, player_id in ipairs(self.red_players) do
+      for _, player_id in ipairs(red_players) do
         Net.lock_player_input(player_id)
         Net.animate_player_properties(player_id, {
           {
@@ -159,7 +185,7 @@ function Arena:try_start()
         })
       end
 
-      for _, player_id in ipairs(self.blue_players) do
+      for _, player_id in ipairs(blue_players) do
         Net.lock_player_input(player_id)
         Net.animate_player_properties(player_id, {
           {
@@ -178,7 +204,7 @@ function Arena:try_start()
     -- start the encounter after some delay to give time for players to see "FIGHT!"
     Async.sleep(1).and_then(function()
       debug_print("encounter started")
-      start_encounter(self)
+      start_encounter(self, red_players, blue_players)
     end)
   end)
 end

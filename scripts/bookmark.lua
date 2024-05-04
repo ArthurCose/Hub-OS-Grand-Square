@@ -76,7 +76,7 @@ Net:on("actor_interaction", function(event)
 
     if response ~= 1 then
       conversation_end(event.actor_id)
-      return
+      return nil
     end
 
     Net.refer_server(event.player_id, SERVER_NAME, "hubos.konstinople.dev:8018")
@@ -84,5 +84,6 @@ Net:on("actor_interaction", function(event)
     Async.await(Ampstr.message_player_async(event.player_id, "Yippee!"))
 
     conversation_end(event.actor_id)
+    return nil
   end)
 end)

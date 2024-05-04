@@ -14,7 +14,7 @@ end
 local arenas = {}
 
 ---@class TrackedPlayer
----@field id string
+---@field id Net.ActorId
 ---@field x number
 ---@field y number
 ---@field tile_x number
@@ -40,11 +40,38 @@ local function track_arenas()
         local tile = Net.get_tile(area_id, x, y, z)
 
         if tile.gid == top_tile_gid then
-          arenas[#arenas + 1] = Arena:new(area_id, x, y, z)
+          local arena = Arena:new(area_id, x, y, z)
+          arena:set_encounter_package("/server/assets/encounters/pvp_arena.zip")
+          arenas[#arenas + 1] = arena
         end
       end
     end
   end
+
+  -- server specific
+  -- todo: convert this script into a lib, in a similar style to the co-op server's plugins
+  local arena = arenas[#arenas]
+  arena:set_encounter_package("/server/assets/encounters/heel.zip")
+  arena:set_ignore_teams(true)
+
+  local heel_id = Net.create_bot({
+    x = arena.x + 2.5,
+    y = arena.y + 1,
+    z = arena.z,
+    texture_path = "/server/assets/bots/heel_navi.png",
+    animation_path = "/server/assets/bots/heel_navi.animation",
+    direction = "Up Left"
+  })
+
+  Net:on("actor_interaction", function(event)
+    if event.actor_id == heel_id then
+      Net.message_player(
+        event.player_id,
+        "...",
+        "/server/assets/bots/heel_navi_mug.png",
+        "/server/assets/bots/three_panel_mug.animation")
+    end
+  end)
 end
 
 track_arenas()
