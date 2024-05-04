@@ -1,0 +1,18 @@
+[package]
+category = "encounter"
+id = "dev.konstinople.encounter.HeelNavi"
+name = "HeelNavi"
+description = ""
+preview_texture_path = "preview.png"
+
+[[defines.characters]]
+id = "dev.konstinople.enemy.HeelNavi"
+path = "character"
+
+[dependencies]
+libraries = ["BattleNetwork.Assets", "dev.konstinople.library.ai"]
+cards = [
+  "BattleNetwork6.Class01.Standard.074",
+  "BattleNetwork5.Class01.Standard.037"
+]
+characters = ["BattleNetwork3.enemy.Gloomer", "BattleNetwork4.Gaia+.Enemy"]

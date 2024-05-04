@@ -41,7 +41,7 @@ local function track_arenas()
 
         if tile.gid == top_tile_gid then
           local arena = Arena:new(area_id, x, y, z)
-          arena:set_encounter_package("/server/assets/encounters/pvp_arena.zip")
+          arena:set_encounter_package("/server/mods/pvp_arena")
           arenas[#arenas + 1] = arena
         end
       end
@@ -51,7 +51,7 @@ local function track_arenas()
   -- server specific
   -- todo: convert this script into a lib, in a similar style to the co-op server's plugins
   local arena = arenas[#arenas]
-  arena:set_encounter_package("/server/assets/encounters/heel.zip")
+  arena:set_encounter_package("/server/mods/heel")
   arena:set_ignore_teams(true)
 
   local heel_id = Net.create_bot({
