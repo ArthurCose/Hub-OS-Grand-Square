@@ -1,4 +1,4 @@
----@type BattleNetworkAssetsLib
+---@type BattleNetwork.Assets
 local bn_assets = require("BattleNetwork.Assets")
 ---@type KonstAiLib
 local AiLib = require("dev.konstinople.library.ai")
@@ -246,6 +246,7 @@ function character_init(character)
   local spawn_virus_factory = create_spawn_action_factory(character)
 
   local bomb_plan = ai:create_plan()
+  bomb_plan:set_weight(7)
   bomb_plan:set_action_iter_factory(function()
     return IteratorLib.chain(
     -- 4 - 6 random movements + idling
@@ -289,6 +290,7 @@ function character_init(character)
   end)
 
   local spawn_virus_plan = ai:create_plan()
+  spawn_virus_plan:set_weight(3)
   spawn_virus_plan:set_action_iter_factory(function()
     return IteratorLib.chain(
     -- 4 - 6 random movements + idling
