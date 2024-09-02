@@ -1,11 +1,11 @@
 local spawn_pattern = {
   { 2, 2 }, -- center
   { 1, 3 }, -- bottom left
+  { 3, 1 }, -- top right
   { 1, 1 }, -- top left
   { 3, 3 }, -- bottom right
-  { 3, 1 }, -- top right
   { 1, 2 }, -- back
-  { 3, 2 }, -- front
+  { 1, 3 }, -- front
   { 2, 1 }, -- top
   { 2, 3 }, -- bottom
 }
