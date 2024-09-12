@@ -223,20 +223,11 @@ function character_init(character)
 
   local animation = character:animation()
   animation:load("battle.animation")
-  animation:set_state("PLAYER_IDLE")
+  animation:set_state("CHARACTER_IDLE")
 
   character.on_idle_func = function()
-    animation:set_state("PLAYER_IDLE")
+    animation:set_state("CHARACTER_IDLE")
   end
-
-  character:register_status_callback(Hit.Flinch, function()
-    character:cancel_actions()
-    character:cancel_movement()
-
-    local action = Action.new(character, "PLAYER_HIT")
-    action:override_animation_frames({ { 1, 15 }, { 2, 7 } })
-    character:queue_action(action)
-  end)
 
   local ai = AiLib.new_ai(character)
 
