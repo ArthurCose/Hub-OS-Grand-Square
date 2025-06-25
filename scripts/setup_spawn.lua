@@ -1,6 +1,6 @@
 local areas = Net.list_areas()
 
-for i, area_id in ipairs(areas) do
+for _, area_id in ipairs(areas) do
   local spawn = Net.get_object_by_name(area_id, "Spawn")
 
   if spawn == nil then

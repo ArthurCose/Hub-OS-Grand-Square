@@ -26,6 +26,61 @@ local arenas = {}
 ---@type TrackedPlayer[]
 local tracked_players = {}
 
+local coop_bots = {
+  -- heel
+  -- {
+  --   encounter = "/server/mods/heel",
+  --   bot_texture = "/server/assets/bots/heel_navi.png",
+  --   bot_animation = "/server/assets/bots/heel_navi.animation",
+  --   on_interact = function(event)
+  --     Net.message_player(
+  --       event.player_id,
+  --       "...",
+  --       "/server/assets/bots/heel_navi_mug.png",
+  --       "/server/assets/bots/three_panel_mug.animation"
+  --     )
+  --   end
+  -- },
+  -- final destination
+  {
+    encounter = "/server/assets/downloaded_mods/dev.konstinople.encounter.final_destination_multiman.zip",
+    bot_texture = "/server/assets/bots/powie.png",
+    bot_animation = "/server/assets/bots/powie.animation",
+    on_interact = function(event) end
+  }
+}
+
+local coop_arena
+local coop_bot_id
+local current_coop_bot = math.random(#coop_bots)
+local COOP_CYCLE_MINS = 60
+
+local function encounter_cycle_loop()
+  if coop_arena then
+    current_coop_bot = current_coop_bot % #coop_bots + 1
+
+    local current_data = coop_bots[current_coop_bot]
+    coop_arena:set_encounter_package(current_data.encounter)
+    Net.set_bot_avatar(coop_bot_id, current_data.bot_texture, current_data.bot_animation)
+  end
+
+  local date = os.date("*t")
+  local secs_to_next_hour = os.time({
+    year = date.year,
+    month = date.month,
+    day = date.day,
+    hour = date.hour,
+    min = date.min // COOP_CYCLE_MINS * COOP_CYCLE_MINS + COOP_CYCLE_MINS
+  }) - os.time()
+
+  Async.sleep(secs_to_next_hour).and_then(encounter_cycle_loop)
+end
+
+if #coop_bots > 1 then
+  encounter_cycle_loop()
+end
+
+-- init arenas
 local function track_arenas()
   local area_width = Net.get_layer_width(area_id)
   local area_height = Net.get_layer_height(area_id)
@@ -50,26 +105,26 @@ local function track_arenas()
 
   -- server specific
   -- todo: convert this script into a lib, in a similar style to the co-op server's plugins
-  local arena = arenas[#arenas]
-  arena:set_encounter_package("/server/mods/heel")
-  arena:set_ignore_teams(true)
 
-  local heel_id = Net.create_bot({
-    x = arena.x + 2.5,
-    y = arena.y + 1,
-    z = arena.z,
-    texture_path = "/server/assets/bots/heel_navi.png",
-    animation_path = "/server/assets/bots/heel_navi.animation",
+  local coop_bot = coop_bots[current_coop_bot]
+
+  coop_arena = arenas[#arenas]
+  coop_arena:set_encounter_package(coop_bot.encounter)
+  coop_arena:set_ignore_teams(true)
+
+  coop_bot_id = Net.create_bot({
+    x = coop_arena.x + 2.5,
+    y = coop_arena.y + 1,
+    z = coop_arena.z,
+    texture_path = coop_bot.bot_texture,
+    animation_path = coop_bot.bot_animation,
     direction = "Up Left"
   })
 
   Net:on("actor_interaction", function(event)
-    if event.actor_id == heel_id then
-      Net.message_player(
-        event.player_id,
-        "...",
-        "/server/assets/bots/heel_navi_mug.png",
-        "/server/assets/bots/three_panel_mug.animation")
+    if event.actor_id == coop_bot_id then
+      local coop_bot = coop_bots[current_coop_bot]
+      coop_bot.on_interact(event)
     end
   end)
 end

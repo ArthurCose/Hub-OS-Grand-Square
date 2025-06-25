@@ -6,8 +6,10 @@ local package_ids = {
   "BattleNetwork5.Class01.Standard.037", -- crakbom
   "BattleNetwork6.Class01.Standard.074", -- longblde
   -- encounters
+  "dev.konstinople.encounter.final_destination_multiman",
   "BattleNetwork3.Virus.Boomer",
   "BattleNetwork4.Gaia",
+  "BattleNetwork5.Powie",
   -- libraries
   "BattleNetwork.Assets",
   "BattleNetwork.FallingRock",
@@ -16,6 +18,7 @@ local package_ids = {
   "dev.konstinople.library.bomb",
   "dev.konstinople.library.iterator",
   "dev.konstinople.library.ai",
+  "dev.konstinople.library.ssb",
 }
 
 ModDownloader.maintain(package_ids)
@@ -23,4 +26,5 @@ ModDownloader.maintain(package_ids)
 -- preload
 Net:on("player_connect", function(event)
   Net.provide_package_for_player(event.player_id, ModDownloader.resolve_asset_path("BattleNetwork.Assets"))
+  Net.provide_package_for_player(event.player_id, ModDownloader.resolve_asset_path("dev.konstinople.library.ssb"))
 end)
