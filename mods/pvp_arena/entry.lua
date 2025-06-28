@@ -11,6 +11,8 @@ local spawn_pattern = {
 }
 
 function encounter_init(encounter, data)
+  encounter:set_spectate_on_delete(true)
+
   for i = 0, data.player_count - 1 do
     local spawn_index = i
     local is_blue = i >= data.red_player_count
