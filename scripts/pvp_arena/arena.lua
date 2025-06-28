@@ -159,7 +159,7 @@ function Arena:try_start()
   debug_print("starting pvp timer")
 
   -- start timing
-  Async.sleep(3).and_then(function()
+  Async.sleep(5).and_then(function()
     if cancelled then
       return
     end
