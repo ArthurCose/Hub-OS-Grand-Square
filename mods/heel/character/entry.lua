@@ -17,7 +17,7 @@ local VIRUS_POOL = {
 }
 
 local function default_random_tile(entity)
-  local tiles = entity:field():find_tiles(function(tile)
+  local tiles = Field.find_tiles(function(tile)
     if not entity:can_move_to(tile) or tile == entity:current_tile() then
       return false
     end
@@ -31,7 +31,7 @@ local function default_random_tile(entity)
 
   if #tiles == 0 then
     -- try anything we can move to
-    tiles = entity:field():find_tiles(function(tile)
+    tiles = Field.find_tiles(function(tile)
       return entity:can_move_to(tile) and tile ~= entity:current_tile()
     end)
   end
@@ -95,8 +95,7 @@ local function create_spawn_action_factory(character)
       return Action.new(character, "CHEER")
     end
 
-    local field = character:field()
-    local tiles = field:find_tiles(function(tile)
+    local tiles = Field.find_tiles(function(tile)
       if not tile:is_walkable() or tile:team() ~= character:team() or tile:is_reserved() then
         return false
       end
@@ -154,13 +153,13 @@ local function create_spawn_action_factory(character)
         i = i + 1
 
         if i == MAX - 1 then
-          field:spawn(ally, tile)
+          Field.spawn(ally, tile)
         elseif i == MAX then
           spell:erase()
         end
       end
 
-      field:spawn(spell, tile)
+      Field.spawn(spell, tile)
       spawned_spell = true
     end)
 
