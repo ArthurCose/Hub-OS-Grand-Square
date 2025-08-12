@@ -80,7 +80,9 @@ local function add_spectator_detection(arena)
 
       local x, y, z = Net.get_player_position_multi(player_id)
 
-      if math.floor(x) ~= center_x_floored or arena.z ~= math.floor(z) then
+      local x_floored = math.floor(x)
+
+      if x_floored < center_x_floored - 1 or x_floored > center_x_floored + 1 or arena.z ~= math.floor(z) then
         goto continue
       end
 
