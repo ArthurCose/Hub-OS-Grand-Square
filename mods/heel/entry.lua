@@ -15,14 +15,22 @@ function encounter_init(encounter, data)
     data = { player_count = 1 }
   end
 
-  for i = 0, data.player_count - 1 do
-    local spawn_index = i
+  encounter:set_spectate_on_delete(true)
 
-    spawn_index = spawn_index % #spawn_pattern + 1
+  local active_player_count = data.red_player_count + data.blue_player_count
 
-    local position = spawn_pattern[spawn_index]
+  for i = 0, encounter:player_count() - 1 do
+    if i < active_player_count then
+      local spawn_index = i
 
-    encounter:spawn_player(i, position[1], position[2])
+      spawn_index = spawn_index % #spawn_pattern + 1
+
+      local position = spawn_pattern[spawn_index]
+
+      encounter:spawn_player(i, position[1], position[2])
+    else
+      encounter:mark_spectator(i)
+    end
   end
 
   encounter:create_spawner("dev.konstinople.enemy.HeelNavi", Rank.V1)

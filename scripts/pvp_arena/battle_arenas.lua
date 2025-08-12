@@ -16,11 +16,13 @@ local arenas_by_area = {}
 ---@field z number
 ---@field center_x number
 ---@field center_y number
+---@field event_emitter Net.EventEmitter "battle_start"
+---@field red_players Net.ActorId[]
+---@field blue_players Net.ActorId[]
+---@field gray_players Net.ActorId[]
 ---@field package encounter_path string
 ---@field package ignore_teams? boolean
 ---@field package fight_active boolean
----@field package red_players Net.ActorId[]
----@field package blue_players Net.ActorId[]
 ---@field package countdown_bots Net.ActorId[]
 ---@field package cancel_countdown_callback? function
 local BattleArena = {}
@@ -69,6 +71,8 @@ function Lib.create_arena(area_id, tile_x, tile_y, tile_z)
     fight_active = false,
     red_players = {},
     blue_players = {},
+    gray_players = {},
+    event_emitter = Net.EventEmitter.new(),
     countdown_bots = countdown_bots,
   }
   setmetatable(arena, BattleArena)
@@ -128,22 +132,28 @@ function BattleArena:try_reset()
 end
 
 ---@param self BattleArena
----@param red_players Net.ActorId
----@param blue_players Net.ActorId
-local function start_encounter(self, red_players, blue_players)
+local function start_encounter(self)
   local player_ids = {}
 
-  for _, player_id in ipairs(red_players) do
+  self.event_emitter:emit("battle_start")
+
+  for _, player_id in ipairs(self.red_players) do
     player_ids[#player_ids + 1] = player_id
   end
 
-  for _, player_id in ipairs(blue_players) do
+  for _, player_id in ipairs(self.blue_players) do
     player_ids[#player_ids + 1] = player_id
   end
+
+  for _, player_id in ipairs(self.gray_players) do
+    player_ids[#player_ids + 1] = player_id
+  end
+
+  self.gray_players = {}
 
   Net.initiate_netplay(player_ids, self.encounter_path, {
-    player_count = #player_ids,
     red_player_count = #self.red_players,
+    blue_player_count = #self.blue_players,
   })
 end
 
@@ -224,7 +234,7 @@ function BattleArena:try_start()
     -- start the encounter after some delay to give time for players to see "FIGHT!"
     Async.sleep(1).and_then(function()
       debug_print("encounter started")
-      start_encounter(self, red_players, blue_players)
+      start_encounter(self)
     end)
   end)
 end

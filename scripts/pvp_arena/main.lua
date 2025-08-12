@@ -56,6 +56,47 @@ if #coop_bots > 1 then
   encounter_cycle_loop()
 end
 
+---@param arena BattleArena
+local function add_spectator_detection(arena)
+  local center_x_floored = math.floor(arena.center_x)
+  local center_y_floored = math.floor(arena.center_y)
+
+  arena.event_emitter:on("battle_start", function()
+    local seen = {}
+
+    for _, value in ipairs(arena.red_players) do
+      seen[value] = true
+    end
+
+    for _, value in ipairs(arena.blue_players) do
+      seen[value] = true
+    end
+
+    for _, player_id in ipairs(Net.list_players(arena.area_id)) do
+      if seen[player_id] then
+        -- already taking part in battle
+        goto continue
+      end
+
+      local x, y, z = Net.get_player_position_multi(player_id)
+
+      if math.floor(x) ~= center_x_floored or arena.z ~= math.floor(z) then
+        goto continue
+      end
+
+      local y_floored = math.floor(y)
+
+      if y_floored ~= center_y_floored - 2 and y_floored ~= center_y_floored + 1 then
+        goto continue
+      end
+
+      arena.gray_players[#arena.gray_players + 1] = player_id
+
+      ::continue::
+    end
+  end)
+end
+
 -- init arenas
 local function track_arenas()
   local area_width = Net.get_layer_width(area_id)
@@ -75,6 +116,7 @@ local function track_arenas()
         if tile.gid == top_tile_gid then
           local arena = BattleArenas.create_arena(area_id, x, y, z)
           arena:set_encounter_package("/server/mods/pvp_arena")
+          add_spectator_detection(arena)
           last_arena = arena
         end
       end
@@ -91,8 +133,8 @@ local function track_arenas()
   coop_arena:set_ignore_teams(true)
 
   coop_bot_id = Net.create_bot({
-    x = coop_arena.x + 2.5,
-    y = coop_arena.y + 1,
+    x = coop_arena.center_x + 1,
+    y = coop_arena.center_y,
     z = coop_arena.z,
     texture_path = coop_bot.bot_texture,
     animation_path = coop_bot.bot_animation,

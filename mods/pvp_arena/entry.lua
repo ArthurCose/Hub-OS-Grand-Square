@@ -23,24 +23,30 @@ function encounter_init(encounter, data)
 
   encounter:set_spectate_on_delete(true)
 
-  for i = 0, data.player_count - 1 do
-    local spawn_index = i
-    local is_blue = i >= data.red_player_count
+  local active_player_count = data.red_player_count + data.blue_player_count
 
-    if is_blue then
-      spawn_index = spawn_index - data.red_player_count
-    end
+  for i = 0, encounter:player_count() - 1 do
+    if i < active_player_count then
+      local spawn_index = i
+      local is_blue = i >= data.red_player_count
 
-    spawn_index = spawn_index % #spawn_pattern + 1
+      if is_blue then
+        spawn_index = spawn_index - data.red_player_count
+      end
 
-    local position = spawn_pattern[spawn_index]
+      spawn_index = spawn_index % #spawn_pattern + 1
 
-    if is_blue then
-      -- blue (mirror)
-      encounter:spawn_player(i, 7 - position[1], position[2])
+      local position = spawn_pattern[spawn_index]
+
+      if is_blue then
+        -- blue (mirror)
+        encounter:spawn_player(i, 7 - position[1], position[2])
+      else
+        -- red
+        encounter:spawn_player(i, position[1], position[2])
+      end
     else
-      -- red
-      encounter:spawn_player(i, position[1], position[2])
+      encounter:mark_spectator()
     end
   end
 end
