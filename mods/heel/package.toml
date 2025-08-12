@@ -10,7 +10,11 @@ id = "dev.konstinople.enemy.HeelNavi"
 path = "character"
 
 [dependencies]
-libraries = ["BattleNetwork.Assets", "dev.konstinople.library.ai"]
+libraries = [
+  "BattleNetwork.Assets",
+  "dev.konstinople.library.ai",
+  "dev.konstinople.library.spectator_fun",
+]
 cards = [
   "BattleNetwork6.Class01.Standard.074",
   "BattleNetwork5.Class01.Standard.037"

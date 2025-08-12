@@ -1,3 +1,5 @@
+local SpectatorFun = require("dev.konstinople.library.spectator_fun")
+
 local spawn_pattern = {
   { 2, 2 }, -- center
   { 1, 3 }, -- bottom left
@@ -15,6 +17,7 @@ function encounter_init(encounter, data)
     data = { player_count = 1 }
   end
 
+  SpectatorFun.init(encounter)
   encounter:set_spectate_on_delete(true)
 
   local active_player_count = data.red_player_count + data.blue_player_count

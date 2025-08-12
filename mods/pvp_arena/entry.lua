@@ -1,4 +1,5 @@
 local HitDamageJudge = require("BattleNetwork6.Libraries.HitDamageJudge")
+local SpectatorFun = require("dev.konstinople.library.spectator_fun")
 local Timers = require("dev.konstinople.library.timers")
 
 local spawn_pattern = {
@@ -16,6 +17,7 @@ local spawn_pattern = {
 function encounter_init(encounter, data)
   encounter:set_turn_limit(15)
   HitDamageJudge.init(encounter)
+  SpectatorFun.init(encounter)
 
   Timers.AfkTimer.init(encounter)
   Timers.CardSelectTimer.init(encounter)
@@ -46,7 +48,7 @@ function encounter_init(encounter, data)
         encounter:spawn_player(i, position[1], position[2])
       end
     else
-      encounter:mark_spectator()
+      encounter:mark_spectator(i)
     end
   end
 end
