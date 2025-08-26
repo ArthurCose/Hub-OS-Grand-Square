@@ -10,6 +10,10 @@ local package_ids = {
   "BattleNetwork3.Virus.Boomer",
   "BattleNetwork4.Gaia",
   "BattleNetwork5.Powie",
+  -- fishing
+  "BattleNetwork6.Cragger",
+  "BattleNetwork6.Piranha",
+  "BattleNetwork5.TileStates.Sea",
   -- libraries
   "BattleNetwork6.Libraries.HitDamageJudge",
   "dev.konstinople.library.timers",

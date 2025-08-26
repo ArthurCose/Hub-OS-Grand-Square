@@ -1,0 +1,5 @@
+animation state="DEFAULT"
+frame
+frame
+frame x="1" y="1" w="13" h="11" originx="1" originy="10"
+frame x="1" y="1" w="13" h="11" originx="1" originy="10" flipx="1"

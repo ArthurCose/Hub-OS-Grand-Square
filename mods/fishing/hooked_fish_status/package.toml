@@ -1,0 +1,8 @@
+[package]
+category = "status"
+id = "GrandSquare.Fishing.HookFishStatus"
+name = "Hook Fish Status"
+description = ""
+icon_texture_path = "icon.png"
+flag_name = "HookFish"
+blocks_actions = true

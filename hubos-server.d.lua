@@ -6,10 +6,12 @@
 
 ---@class Net.SpriteId
 
+---@class Net.BattleId
+
 ---@class Net.EventEmitter
 Net.EventEmitter = {}
 
----@class Net.Promise<T>: { and_then: fun(callback: fun(T)) }
+---@class Net.Promise<T>: { and_then: fun(callback: fun(value: T)) }
 
 ---@class Net.Position
 ---@field x number
@@ -120,7 +122,7 @@ Net.EventEmitter = {}
 ---Net.message_player(player_id, message, textbox_options)
 ---```
 ---@class Net.TextStyle
----@field font_name? string
+---@field font? string
 ---@field monospace? boolean
 ---@field min_glyph_width? number
 ---@field letter_spacing? number
@@ -145,6 +147,22 @@ Net.EventEmitter = {}
 ---@field texture_path string
 ---@field animation_path? string
 ---@field animation? string Animation state, this state will be looped.
+---@class Net.TextSpriteOptions
+---@field player_id? Net.ActorId Restricts visibility to this specific player if set.
+---@field parent_id "widget" | "hud" | Net.ActorId
+---A point defined in the parent's animation file or built-in point such as "EMOTE".
+---If unset the origin will be used.
+---
+---For "widget" and "hud" the origin is the top left of the screen.
+---@field parent_point? string
+---@field x? number Offset from `parent_point` in screen pixels
+---@field y? number Offset from `parent_point` in screen pixels
+---@field layer? number Used for sorting sprites relative to the parent. Use negatives if you want to display in front of other sprites.
+---@field text string
+---@field text_style Net.TextStyle
+---@field h_align? "left" | "center" | "right"
+---@field v_align? "top" | "center" | "bottom"
+
 
 --- All fields are in the range: [0, 255]
 ---@class Net.Color
@@ -831,20 +849,20 @@ function Net.prompt_player(player_id, character_limit, default_text) end
 ---@param player_id Net.ActorId
 ---@param board_name string
 ---@param color Net.Color
----@param posts Net.BoardPost
+---@param posts Net.BoardPost[]
 ---@param open_instantly? boolean
 ---@return Net.EventEmitter
 function Net.open_board(player_id, board_name, color, posts, open_instantly) end
 
 --- Issues may arise when multiple scripts create boards at the same time.
 ---@param player_id Net.ActorId
----@param posts Net.BoardPost
+---@param posts Net.BoardPost[]
 ---@param post_id? string
 function Net.prepend_posts(player_id, posts, post_id) end
 
 --- Issues may arise when multiple scripts create boards at the same time.
 ---@param player_id Net.ActorId
----@param posts Net.BoardPost
+---@param posts Net.BoardPost[]
 ---@param post_id? string
 function Net.append_posts(player_id, posts, post_id) end
 
@@ -873,6 +891,18 @@ function Net.open_shop(player_id, shop_items, mug_texture_path, mug_animation_pa
 ---@param message string
 function Net.set_shop_message(player_id, message) end
 
+--- Issues may arise when multiple scripts create shops at the same time.
+---@param player_id Net.ActorId
+---@param shop_items Net.ShopItem[]
+---@param item_id? string
+function Net.prepend_shop_items(player_id, shop_items, item_id) end
+
+--- Issues may arise when multiple scripts create bshopsoards at the same time.
+---@param player_id Net.ActorId
+---@param shop_items Net.ShopItem[]
+---@param item_id? string
+function Net.append_shop_items(player_id, shop_items, item_id) end
+
 --- - `shop_item`: [Net.ShopItem](https://docs.hubos.dev/server/lua-api/widgets#netshopitem)
 ---
 --- Replaces the `shop_item` for the item matching the `id`.
@@ -891,6 +921,13 @@ function Net.remove_shop_item(player_id, item_id) end
 ---@param sprite_options Net.SpriteOptions
 ---@return Net.SpriteId
 function Net.create_sprite(sprite_options) end
+
+--- - `text_sprite_options` [Net.TextSpriteOptions](https://docs.hubos.dev/server/lua-api/widgets#nettextspriteoptions)
+---
+--- Returns sprite_id
+---@param text_sprite_options Net.TextSpriteOptions
+---@return Net.SpriteId
+function Net.create_text_sprite(text_sprite_options) end
 
 --- Sets the animation state for the sprite.
 ---@param sprite_id Net.SpriteId
@@ -915,6 +952,13 @@ function Net.set_player_map_color(player_id, color) end
 ---@param bot_id Net.ActorId
 ---@param color Net.Color
 function Net.set_bot_map_color(bot_id, color) end
+
+--- Sends a link to the player to open in the browser. Permission will be asked before opening.
+---
+--- Supports `http://` and `https://` protocols.
+---@param player_id Net.ActorId
+---@param address string
+function Net.refer_link(player_id, address) end
 
 --- Opens a menu for the player to save the referred server.
 ---@param player_id Net.ActorId
@@ -1149,25 +1193,62 @@ function Net.is_player_battling(player_id) end
 
 --- - `encounter_data`: anything that could be represented as JSON.
 ---   - Read as second param in encounter_init for the encounter package
+---
+--- Returns an event emitter and a battle id.
+---
+--- ```lua
+--- local emitter, battle_id = Net.initiate_encounter(player_id, "/server/mods/my-encounter")
+--- ```
 ---@param player_id Net.ActorId
 ---@param package_path string
 ---@param encounter_data? any
+---@return Net.EventEmitter, Net.BattleId
 function Net.initiate_encounter(player_id, package_path, encounter_data) end
 
 --- - `encounter_data`: anything that could be represented as JSON.
 ---   - Read as second param in encounter_init for the encounter package
+---
+--- Returns an event emitter and a battle id.
+---
+--- ```lua
+--- local emitter, battle_id = Net.initiate_pvp(player_a, player_b, "/server/mods/my-encounter")
+--- ```
 ---@param player_1_id Net.ActorId
 ---@param player_2_id Net.ActorId
 ---@param package_path? string
 ---@param encounter_data? any
+---@return Net.EventEmitter, Net.BattleId
 function Net.initiate_pvp(player_1_id, player_2_id, package_path, encounter_data) end
 
 --- - `encounter_data`: anything that could be represented as JSON.
 ---   - Read as second param in encounter_init for the encounter package
+---
+--- Returns an event emitter and a battle id.
+---
+--- ```lua
+--- local emitter, battle_id = Net.initiate_netplay(player_ids, "/server/mods/my-encounter")
+--- ```
 ---@param player_ids Net.ActorId[]
 ---@param package_path? string
 ---@param encounter_data? any
+---@return Net.EventEmitter, Net.BattleId
 function Net.initiate_netplay(player_ids, package_path, encounter_data) end
+
+--- Sends data to callbacks provided to [encounter:on_server_message()](https://docs.hubos.dev/client/lua-api/field-api/encounter#encounteron_server_messagefunctiondata) in encounter mods sent to the client.
+---
+--- ```lua
+--- local emitter, battle_id = Net.initiate_encounter(player_ids, "/server/mods/my-encounter")
+---
+--- emitter:on("battle_message", function(event)
+---   -- read and respond to encounter:send_to_server() messages
+---   print(event.data)
+---   Net.send_battle_message(battle_id, "Pong!")
+---   Net.send_battle_message(battle_id, { a = "b" })
+--- end)
+--- ```
+---@param battle_id Net.BattleId
+---@param encounter_data any
+function Net.send_battle_message(battle_id, encounter_data) end
 
 --- Sends the player to a different area.
 ---@param player_id Net.ActorId

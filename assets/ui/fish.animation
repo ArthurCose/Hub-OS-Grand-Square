@@ -1,0 +1,17 @@
+animation state="PIRANHA_V1"
+frame x="1" y="1" w="34" h="29" originx="17" originy="24"
+
+animation state="PIRANHA_V2"
+frame x="36" y="1" w="34" h="29" originx="17" originy="24"
+
+animation state="PIRANHA_V3"
+frame x="71" y="1" w="34" h="29" originx="17" originy="24"
+
+animation state="PIRANHA_SP"
+frame x="1" y="31" w="34" h="29" originx="17" originy="24"
+
+animation state="PIRANHA_RARE1"
+frame x="36" y="31" w="34" h="29" originx="17" originy="24"
+
+animation state="PIRANHA_RARE2"
+frame x="71" y="31" w="34" h="29" originx="17" originy="24"
