@@ -10,17 +10,11 @@ local objects = Net.list_objects(area_id)
 
 local relevant_tile_id = Net.get_tileset(area_id, "/server/assets/tiles/ripples.tsx").first_gid
 
-local function tile_hash(x, y, z)
-  return (x << 32) | (y << 16) | z
-end
-
-local function position_from_hash(hash)
-  return hash >> 32, (hash >> 16) & 65535, hash & 65535
-end
-
 ---@class FishingPool
 ---@field available number[]
 ---@field ripple_encounters table<number, number>
+---@field min_ripple_encounters number min encounters a single ripple provides
+---@field max_ripple_encounters number max encounters a single ripple provides
 ---@field total_ripples number
 ---@field max_ripples number
 
@@ -29,19 +23,37 @@ local function create_pool(max_spawns)
   return {
     available = {},
     ripple_encounters = {},
+    min_ripple_encounters = 1,
+    max_ripple_encounters = 1,
     total_ripples = 0,
     max_ripples = max_spawns
   }
 end
 
 local pond_pool = create_pool(2)
+pond_pool.min_ripple_encounters = 2
+pond_pool.max_ripple_encounters = 2
+
 local generic_pool = create_pool(4)
+pond_pool.min_ripple_encounters = 2
+pond_pool.max_ripple_encounters = 5
+
 local pools = { pond_pool, generic_pool }
+
 ---@type table<Net.ActorId, fun(player_id: Net.ActorId)>
 local actor_handlers = {}
 ---@type table<number, fun(player_id: Net.ActorId)>
 local object_handlers = {}
 
+local function tile_hash(x, y, z)
+  return (x << 32) | (y << 16) | z
+end
+
+local function position_from_hash(hash)
+  return hash >> 32, (hash >> 16) & 65535, hash & 65535
+end
+
+-- read map data
 for _, id in ipairs(objects) do
   local object = Net.get_object_by_id(area_id, id)
 
@@ -296,7 +308,7 @@ local function spawn_ripples()
   for _, pool in ipairs(pools) do
     if pool.total_ripples < pool.max_ripples then
       local hash = table.remove(pool.available, math.random(#pool.available))
-      pool.ripple_encounters[hash] = math.random(1, 3)
+      pool.ripple_encounters[hash] = math.random(pool.min_ripple_encounters, pool.max_ripple_encounters)
       pool.total_ripples = pool.total_ripples + 1
 
       local x, y, z = position_from_hash(hash)
