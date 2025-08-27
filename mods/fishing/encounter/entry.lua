@@ -46,15 +46,15 @@ local enemy_pools = {
 
   -- unlocked at bait level 3
   {
-    { piranha_v2, piranha_v2, cragger_v1 },
-    { piranha_v2, piranha_v3, cragger_v2 },
-    { piranha_v3, piranha_v3, cragger_v3 }
+    { piranha_v3, cragger_v1, cragger_v3 },
+    { piranha_v2, piranha_v3, cragger_v3 },
+    { piranha_v3, piranha_v3, cragger_v2 }
   },
 
   -- unlocked at bait level 4
   {
     { piranha_v3, piranha_sp, cragger_sp },
-    { piranha_v3, piranha_sp, cragger_v1 },
+    { piranha_sp, cragger_v2, cragger_v3 },
     { piranha_sp, piranha_sp, cragger_rare1 }
   },
 
