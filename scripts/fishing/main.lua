@@ -304,7 +304,7 @@ local function spawn_ripples()
     end
   end
 
-  Async.sleep(60).and_then(spawn_ripples)
+  Async.sleep(80).and_then(spawn_ripples)
 end
 
 spawn_ripples()
