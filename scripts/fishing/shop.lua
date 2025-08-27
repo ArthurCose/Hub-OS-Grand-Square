@@ -378,7 +378,7 @@ function FishingShop.handle_interaction(player_id)
             goto continue
           end
 
-          local price = (bait_item.price * count) // BAIT_PER_PURCHASE
+          local price = bait_item.price * count
 
           try_purchase(player_id, data, price, function()
             respond_to_purchase(player_id)
