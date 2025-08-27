@@ -63,27 +63,27 @@ FishingShop.BAIT_ITEM_MAP = {
     description = "Lvl 2 Fish Bait\n\nAffects rank",
     consumable = true,
     price = 1,
-    upgrade_price = { 300, 100, 200, 300 }
+    upgrade_price = { 250, 100, 150, 200 }
   },
   ["bait:3"] = {
     name = "HoneyPot",
     description = "Lvl 3 Fish Bait\n\nAffects rank",
     consumable = true,
     price = 2,
-    upgrade_price = { 800, 200, 400, 800 }
+    upgrade_price = { 600, 200, 300, 400 }
   },
   ["bait:4"] = {
     name = "Cob",
     description = "Lvl 4 Fish Bait\n\nAffects rank",
     consumable = true,
     price = 3,
-    upgrade_price = { 2000, 1000, 1200, 1600 }
+    upgrade_price = { 1600, 400, 600, 800 }
   },
   -- ["bait:5"] = {
   --   name = "BugCrumb",
   --   description = "Lvl 5 Fish Bait\n\nAffects rank",
   --   price = 5,
-  --   upgrade_price = { 5000, 7000, 9000 }
+  --   upgrade_price = { 4000, 1000, 2000 }
   -- }
 }
 
