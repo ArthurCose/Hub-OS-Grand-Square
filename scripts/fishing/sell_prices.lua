@@ -6,6 +6,6 @@ return {
     V3 = 4,
     SP = 8,
     Rare1 = 16,
-    Rare2 = 20
+    Rare2 = 32
   }
 }
