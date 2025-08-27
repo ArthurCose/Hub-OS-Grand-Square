@@ -100,7 +100,10 @@ local MOD_ITEMS = {
 local item_description_map = {}
 item_description_map[HELP_ID] = HELP_DATA.description
 
-for id, definition in pairs(FishingShop.BAIT_ITEM_MAP) do
+for i = #BAIT_IDS, 1, -1 do
+  local id = BAIT_IDS[i]
+  local definition = FishingShop.BAIT_ITEM_MAP[id]
+
   Net.register_item(id, definition)
   item_description_map[id] = definition.description
   item_description_map[bait_upgrade_id(id)] = definition.name ..
