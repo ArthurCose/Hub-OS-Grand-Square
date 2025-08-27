@@ -139,9 +139,9 @@ local function create_reeling_action(user, fish, success_callback)
 
       if any(REEL_INPUTS, function(input) return user:input_has(input) end) then
         -- snap the line if the player is mashing
-        reeling = true
-
         Resources.play_audio(SNAP_SFX)
+
+        reeling_step.on_update_func = nil
 
         rod_animation:set_state("DEFAULT", REEL_FAIL_FRAME_DATA)
         animation:set_state("CHARACTER_SWING_HILT", REEL_FAIL_FRAME_DATA)
