@@ -35,8 +35,8 @@ pond_pool.min_ripple_encounters = 2
 pond_pool.max_ripple_encounters = 2
 
 local generic_pool = create_pool(4)
-pond_pool.min_ripple_encounters = 2
-pond_pool.max_ripple_encounters = 5
+generic_pool.min_ripple_encounters = 2
+generic_pool.max_ripple_encounters = 5
 
 local pools = { pond_pool, generic_pool }
 
