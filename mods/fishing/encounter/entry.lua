@@ -22,9 +22,9 @@ local pool_weights = {
   -- bait level 2
   { 1, 2, 0, 0, 0 },
   -- bait level 3
-  { 0, 1, 1, 0, 0 },
+  { 0, 1, 2, 0, 0 },
   -- bait level 4
-  { 0, 1, 2, 2, 0 },
+  { 0, 1, 2, 3, 0 },
   -- bait level 5
   { 0, 1, 2, 6, 1 },
 }
