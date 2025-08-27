@@ -2,7 +2,7 @@ local PlayerFishingData = require("scripts/fishing/player_data")
 local StringUtil = require("scripts/fishing/string_util")
 
 local BAIT_PER_UPGRADE = 3
-local BAIT_PER_PURCHASE = BAIT_PER_UPGRADE
+local BAIT_PER_PURCHASE = 32 -- just buy as much as possible for now
 
 local TEXTURE_PATH = "/server/assets/bots/heel_navi.png"
 local ANIMATION_PATH = "/server/assets/bots/heel_navi.animation"
