@@ -170,6 +170,7 @@ Net:on("tile_interaction", function(event)
     pool.ripple_encounters[hash] = remaining_encounters
 
     if remaining_encounters <= 0 then
+      pool.ripple_encounters[hash] = nil
       pool.available[#pool.available + 1] = hash
       pool.total_ripples = pool.total_ripples - 1
       Net.set_tile(area_id, x, y, z, 0)
