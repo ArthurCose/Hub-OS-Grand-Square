@@ -87,8 +87,15 @@ FishingShop.BAIT_ITEM_MAP = {
   -- }
 }
 
-local MOD_ITEM_IDS = {}
-local MOD_ITEMS = {}
+local MOD_ITEM_IDS = { "mod:fish_chip" }
+local MOD_ITEMS = {
+  ["mod:fish_chip"] = {
+    name = "Fish",
+    description = "Toss a\nfish onto\nthe field",
+    price = 4500,
+    package_id = "GrandSquare.Cards.Fish"
+  },
+}
 
 local item_description_map = {}
 item_description_map[HELP_ID] = HELP_DATA.description
