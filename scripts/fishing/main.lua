@@ -304,6 +304,23 @@ Net:on("item_use", function(event)
       end)
 end)
 
+local player_count = 0
+
+local function updated_player_count()
+  pond_pool.max_ripple_encounters = math.max(2, 2 * player_count)
+  print("player count: " .. player_count)
+end
+
+Net:on("player_request", function()
+  player_count = player_count + 1
+  updated_player_count()
+end)
+
+Net:on("player_disconnect", function()
+  player_count = player_count - 1
+  updated_player_count()
+end)
+
 local function spawn_ripples()
   for _, pool in ipairs(pools) do
     if pool.total_ripples < pool.max_ripples then
