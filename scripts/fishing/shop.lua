@@ -72,7 +72,7 @@ FishingShop.BAIT_ITEM_MAP = {
     consumable = true,
     price = 2,
     -- unlocks after ~100 Piranha3s
-    upgrade_price = { 400, 150, 200, 250 }
+    upgrade_price = { 400, 100, 125, 150 }
   },
   ["bait:4"] = {
     name = "Cob",
