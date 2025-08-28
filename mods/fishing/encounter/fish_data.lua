@@ -12,7 +12,7 @@ fish_data.Piranha = {
     name = "Piranha",
     rank = "V1",
     slide_timing = { { 12, 12 } },
-    fight_timing = { { 30, 40 }, { 15, 20 } },
+    fight_timing = { { 15, 20 } },
   },
   [Rank.V2] = {
     name = "Piranha",
@@ -29,20 +29,20 @@ fish_data.Piranha = {
   [Rank.SP] = {
     name = "Piranha",
     rank = "SP",
-    slide_timing = { { 8, 10 }, { 4, 6 } },
-    fight_timing = { { 6, 8 } },
+    slide_timing = { { 8, 10 }, { 6, 8 } },
+    fight_timing = { { 6, 8 }, { 2, 4 }, },
   },
   [Rank.Rare1] = {
     name = "Piranha",
     rank = "Rare1",
     slide_timing = { { 8, 10 }, { 4, 6 } },
-    fight_timing = { { 5, 6 }, { 4, 4 } },
+    fight_timing = { { 4, 6 }, { 2, 3 } },
   },
   [Rank.Rare2] = {
     name = "Piranha",
     rank = "Rare2",
     slide_timing = { { 6, 8 }, { 4, 8 } },
-    fight_timing = { { 5, 6 }, { 2, 4 } },
+    fight_timing = { { 2, 5 }, { 1, 3 } },
   }
 }
 

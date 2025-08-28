@@ -162,7 +162,7 @@ local function create_reeling_action(user, fish, success_callback)
       -- fight the line!
 
       if fight_timer == 0 then
-        max_fight_time = resolve_timing(data.fight_timing, distance)
+        max_fight_time = resolve_timing(data.fight_timing, distance + 1)
       end
 
       if fight_timer > max_fight_time then
