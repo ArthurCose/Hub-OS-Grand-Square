@@ -24,13 +24,13 @@ fish_data.Piranha = {
     name = "Piranha",
     rank = "V3",
     slide_timing = { { 6, 12 } },
-    fight_timing = { { 8, 12 }, { 4, 6 } },
+    fight_timing = { { 8, 12 }, { 5, 7 } },
   },
   [Rank.SP] = {
     name = "Piranha",
     rank = "SP",
     slide_timing = { { 8, 10 }, { 6, 8 } },
-    fight_timing = { { 6, 8 }, { 2, 4 }, },
+    fight_timing = { { 6, 9 }, { 3, 5 }, },
   },
   [Rank.Rare1] = {
     name = "Piranha",
