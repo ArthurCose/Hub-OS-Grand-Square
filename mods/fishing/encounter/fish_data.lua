@@ -24,7 +24,7 @@ fish_data.Piranha = {
     name = "Piranha",
     rank = "V3",
     slide_timing = { { 6, 12 } },
-    fight_timing = { { 8, 12 }, { 6, 8 } },
+    fight_timing = { { 8, 12 }, { 4, 6 } },
   },
   [Rank.SP] = {
     name = "Piranha",
