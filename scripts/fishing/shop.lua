@@ -194,6 +194,7 @@ local function first_interaction(player_id, data)
 end
 
 ---@param data PlayerFishingData
+---@param item_id string
 local function resolve_bait_purchase_count(data, item_id)
   local item = FishingShop.BAIT_ITEM_MAP[item_id]
 
@@ -209,6 +210,17 @@ local function resolve_bait_purchase_count(data, item_id)
   end
 
   return math.max(math.min(max_capacity - bait_count, BAIT_PER_PURCHASE, affordable_count), 0)
+end
+
+---@param item_id string
+---@param count number
+---@return Net.ShopItem
+local function build_bait_shop_item(item_id, bait_item, count)
+  return {
+    id = item_id,
+    name = bait_item.name .. " x" .. count,
+    price = bait_item.price * count .. "z"
+  }
 end
 
 ---@param player_id Net.ActorId
@@ -256,12 +268,7 @@ function FishingShop.handle_interaction(player_id)
 
       if upgrade_count > 0 then
         local count = resolve_bait_purchase_count(data, id)
-
-        shop_items[#shop_items + 1] = {
-          id = id,
-          name = item.name .. " x" .. count,
-          price = item.price * count .. "z"
-        }
+        shop_items[#shop_items + 1] = build_bait_shop_item(id, item, count)
       end
 
       if (upgrade_count > 0 or prev_upgrade_count > 0) and upgrade_count < #item.upgrade_price then
@@ -353,6 +360,10 @@ function FishingShop.handle_interaction(player_id)
 
                 -- todo: add the option for the next upgrade
               end
+
+              local bait_purchase_count = resolve_bait_purchase_count(data, item_id)
+              local updated_shop_item = build_bait_shop_item(item_id, bait_item, bait_purchase_count)
+              Net.update_shop_item(player_id, updated_shop_item)
             end)
           end
         elseif StringUtil.starts_with(item_id, "bait:") then
@@ -394,11 +405,8 @@ function FishingShop.handle_interaction(player_id)
             local next_purchase_count = resolve_bait_purchase_count(data, item_id)
 
             if next_purchase_count ~= count then
-              Net.update_shop_item(player_id, {
-                id = item_id,
-                name = bait_item.name .. " x" .. next_purchase_count,
-                price = bait_item.price * next_purchase_count .. "z"
-              })
+              local updated_shop_item = build_bait_shop_item(item_id, bait_item, next_purchase_count)
+              Net.update_shop_item(player_id, updated_shop_item)
             end
           end)
         elseif StringUtil.starts_with(item_id, "mod:") then
