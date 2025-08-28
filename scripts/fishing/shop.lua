@@ -64,7 +64,7 @@ FishingShop.BAIT_ITEM_MAP = {
     consumable = true,
     price = 1,
     -- unlocks after ~75 Piranha2s
-    upgrade_price = { 150, 75, 100, 125 }
+    upgrade_price = { 150, 50, 75, 100 }
   },
   ["bait:3"] = {
     name = "HoneyPot",
@@ -80,7 +80,7 @@ FishingShop.BAIT_ITEM_MAP = {
     consumable = true,
     price = 3,
     -- unlocks after ~125 PiranhaSPs
-    upgrade_price = { 1200, 400, 600, 800 }
+    upgrade_price = { 1200, 200, 300, 400 }
   },
   -- ["bait:5"] = {
   --   name = "BugCrumb",

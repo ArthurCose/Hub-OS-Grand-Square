@@ -24,9 +24,9 @@ local pool_weights = {
   -- bait level 3
   { 0, 1, 4, 0, 0 },
   -- bait level 4
-  { 0, 1, 2, 6, 0 },
+  { 0, 1, 4, 5, 0 },
   -- bait level 5
-  { 0, 0, 1, 6, 1 },
+  { 0, 0, 1, 6, 2 },
 }
 
 local enemy_pools = {
