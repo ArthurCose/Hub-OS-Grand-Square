@@ -153,7 +153,12 @@ local function create_reeling_action(user, fish, success_callback)
       return
     end
 
-    if not artifact:is_moving() and distance < INITIAL_DISTANCE then
+    if artifact:is_moving() then
+      -- fish is moving, block new actions
+      return
+    end
+
+    if distance < INITIAL_DISTANCE then
       -- fight the line!
 
       if fight_timer == 0 then
