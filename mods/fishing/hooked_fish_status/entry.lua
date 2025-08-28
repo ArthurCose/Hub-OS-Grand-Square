@@ -17,7 +17,17 @@ function status_init(status)
 
   status.on_delete_func = function()
     original_tile:add_entity(fish)
-    original_tile:remove_reservation_for(fish)
-    component:eject()
+
+    -- switch component to handle removing reservation
+    component.on_update_func = function()
+      if fish:has_actions() then
+        -- piranhas will try to shoot while hooked,
+        -- causing it to wait until the action ends before reserving the original tile
+        return
+      end
+
+      original_tile:remove_reservation_for(fish)
+      component:eject()
+    end
   end
 end
