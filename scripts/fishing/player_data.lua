@@ -77,6 +77,8 @@ end
 Async.ensure_dir(PLAYER_DATA_DIR)
 
 Net:on("player_connect", function(event)
+  Net.set_player_restrictions(event.player_id, "/server/assets/fishing_restrictions.toml")
+
   PlayerFishingData.fetch(event.player_id)
       .and_then(function(data)
         if not data then return end

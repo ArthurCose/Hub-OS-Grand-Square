@@ -1,0 +1,2 @@
+[packages]
+id_blacklist = ["BattleNetwork3.Program02.BreakBuster"]
