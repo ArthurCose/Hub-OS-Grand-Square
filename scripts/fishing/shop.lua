@@ -63,13 +63,15 @@ FishingShop.BAIT_ITEM_MAP = {
     description = "Lvl 2 Fish Bait\n\nAffects rank",
     consumable = true,
     price = 1,
-    upgrade_price = { 200, 75, 100, 125 }
+    -- unlocks after ~75 Piranha2s
+    upgrade_price = { 150, 75, 100, 125 }
   },
   ["bait:3"] = {
     name = "HoneyPot",
     description = "Lvl 3 Fish Bait\n\nAffects rank",
     consumable = true,
     price = 2,
+    -- unlocks after ~100 Piranha3s
     upgrade_price = { 400, 150, 200, 250 }
   },
   ["bait:4"] = {
@@ -77,13 +79,14 @@ FishingShop.BAIT_ITEM_MAP = {
     description = "Lvl 4 Fish Bait\n\nAffects rank",
     consumable = true,
     price = 3,
-    upgrade_price = { 800, 400, 600, 800 }
+    -- unlocks after ~125 PiranhaSPs
+    upgrade_price = { 1200, 400, 600, 800 }
   },
   -- ["bait:5"] = {
   --   name = "BugCrumb",
   --   description = "Lvl 5 Fish Bait\n\nAffects rank",
   --   price = 5,
-  --   upgrade_price = { 2400, 1000, 2000 }
+  --   upgrade_price = { 3000, 1000, 2000 }
   -- }
 }
 
