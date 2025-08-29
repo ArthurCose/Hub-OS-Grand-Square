@@ -34,7 +34,7 @@ Async.read_file(SAVE_LOCATION).and_then(function(value)
   end)
 
   if not status then
-    print("Failed to read data from \"" .. SAVE_LOCATION .. "\":")
+    warn("Failed to read data from \"" .. SAVE_LOCATION .. "\":")
     print(err)
   end
 end)

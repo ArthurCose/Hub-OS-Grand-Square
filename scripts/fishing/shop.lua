@@ -344,7 +344,7 @@ function FishingShop.handle_interaction(player_id)
           local bait_item = FishingShop.BAIT_ITEM_MAP[bait_id]
 
           if not bait_item then
-            print("invalid purchase attempt: " .. item_id)
+            warn("invalid purchase attempt: " .. item_id)
             goto continue
           end
 
@@ -387,7 +387,7 @@ function FishingShop.handle_interaction(player_id)
           local bait_item = FishingShop.BAIT_ITEM_MAP[item_id]
 
           if not bait_item then
-            print("invalid purchase attempt: " .. item_id)
+            warn("invalid purchase attempt: " .. item_id)
             goto continue
           end
 
@@ -425,7 +425,7 @@ function FishingShop.handle_interaction(player_id)
           local mod_item = MOD_ITEMS[item_id]
 
           if not mod_item then
-            print("invalid purchase attempt: " .. item_id)
+            warn("invalid purchase attempt: " .. item_id)
             goto continue
           end
 
@@ -444,7 +444,7 @@ function FishingShop.handle_interaction(player_id)
             end)
           end
         else
-          print("invalid purchase attempt: " .. item_id)
+          warn("invalid purchase attempt: " .. item_id)
         end
 
         if bait_purchased or data.money ~= prev_money then

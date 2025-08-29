@@ -150,7 +150,7 @@ Net:on("tile_interaction", function(event)
 
     if not bait_item then
       -- invalid bait?
-      print("invalid bait: " .. bait_id)
+      warn("invalid bait: " .. bait_id)
       return nil
     end
 
@@ -212,14 +212,14 @@ Net:on("tile_interaction", function(event)
       local rank_sell_prices = SellPrices[fish_name]
 
       if not rank_sell_prices then
-        print("bad data from client: ", fish_data)
+        warn("bad data from client: ", fish_data)
         return
       end
 
       local sell_price = rank_sell_prices[rank]
 
       if not sell_price then
-        print("bad data from client: ", fish_data)
+        warn("bad data from client: ", fish_data)
         return
       end
 
@@ -287,7 +287,7 @@ Net:on("item_use", function(event)
   local bait_item = FishingShop.BAIT_ITEM_MAP[event.item_id]
 
   if not bait_item then
-    print("invalid item selection: ", event.item_id)
+    warn("invalid item selection: ", event.item_id)
     return
   end
 
@@ -310,7 +310,7 @@ local player_count = 0
 
 local function updated_player_count()
   pond_pool.max_ripple_encounters = math.max(2, 2 * player_count)
-  print("player count: " .. player_count)
+  warn("player count: " .. player_count)
 end
 
 Net:on("player_request", function()
