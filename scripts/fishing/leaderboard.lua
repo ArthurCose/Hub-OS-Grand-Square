@@ -7,24 +7,38 @@ local BOARD_COLOR = { r = 104, g = 184, b = 111 }
 ---@field points number
 
 ---@class FishingLeaderboardData
----@field players table<string, FishingLeaderboardRow> raw identity -> data
+---@field year number
 ---@field month number
+---@field players table<string, FishingLeaderboardRow> raw identity -> data
 
 ---@class FishingLeaderboard
 ---@field package data FishingLeaderboardData
 local FishingLeaderboard = {
-  data = { players = {}, month = 0 }
+  data = { year = 0, month = 0, players = {} }
 }
 
+local ARCHIVE_PATH = "scripts/fishing/_data/leaderboard_archive/"
 local FILE_PATH = "scripts/fishing/_data/leaderboard.json"
 
 function FishingLeaderboard.reset()
+  local date = os.date("*t")
+
+  FishingLeaderboard.data.year = tonumber(date.year) --[[@as number]]
+  FishingLeaderboard.data.month = tonumber(date.month) --[[@as number]]
   FishingLeaderboard.data.players = {}
-  FishingLeaderboard.data.month = tonumber(os.date("*t").month) --[[@as number]]
 end
 
 function FishingLeaderboard.save()
   Async.write_file(FILE_PATH, json.encode(FishingLeaderboard.data))
+end
+
+function FishingLeaderboard.archive()
+  local data = FishingLeaderboard.data
+  local date_string = string.format("%d-%02d", data.year, data.month)
+
+  Async.ensure_dir(ARCHIVE_PATH).and_then(function()
+    Async.write_file(ARCHIVE_PATH .. date_string .. ".json", json.encode(FishingLeaderboard.data))
+  end)
 end
 
 ---@param player_id Net.ActorId
@@ -87,10 +101,20 @@ end)
 
 local function monthly_loop()
   local date = os.date("*t")
-  local diff = os.time({ year = date.year, month = FishingLeaderboard.data.month + 1, day = 1 }) - os.time()
+  local date_param = {
+    year = date.year,
+    month = FishingLeaderboard.data.month + 1,
+    day = 1,
+    hour = 0,
+    min = 0,
+    sec = 0
+  }
+  local diff = os.time(date_param) - os.time()
 
   Async.sleep(diff).and_then(function()
+    FishingLeaderboard.archive()
     FishingLeaderboard.reset()
+    FishingLeaderboard.save()
     monthly_loop()
   end)
 end
