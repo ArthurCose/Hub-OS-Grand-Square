@@ -225,6 +225,22 @@ end
 
 ---@param player_id Net.ActorId
 ---@param data PlayerFishingData
+local function update_bait_shop_items(player_id, data)
+  for _, item_id in ipairs(BAIT_IDS) do
+    local upgrade_id = bait_upgrade_id(item_id)
+
+    if data.hidden_inventory[upgrade_id] then
+      local count = resolve_bait_purchase_count(data, item_id)
+
+      local bait_item = FishingShop.BAIT_ITEM_MAP[item_id]
+      local shop_item = build_bait_shop_item(item_id, bait_item, count)
+      Net.update_shop_item(player_id, shop_item)
+    end
+  end
+end
+
+---@param player_id Net.ActorId
+---@param data PlayerFishingData
 ---@param price number
 ---@param success_callback fun() called before saving
 local function try_purchase(player_id, data, price, success_callback)
@@ -246,6 +262,7 @@ end
 ---@param player_id Net.ActorId
 function FishingShop.handle_interaction(player_id)
   Async.create_scope(function()
+    ---@type PlayerFishingData
     local data = Async.await(PlayerFishingData.fetch(player_id))
 
     if not data.inventory[FishingShop.FISHING_ROD_ID] then
@@ -308,6 +325,9 @@ function FishingShop.handle_interaction(player_id)
       local item_id = event.item_id
 
       if event_name == "shop_purchase" then
+        local prev_money = data.money
+        local bait_purchased = false
+
         if item_id == HELP_ID then
           -- requested help
           local question = "Want me to explain how fishing works?"
@@ -360,10 +380,6 @@ function FishingShop.handle_interaction(player_id)
 
                 -- todo: add the option for the next upgrade
               end
-
-              local bait_purchase_count = resolve_bait_purchase_count(data, bait_id)
-              local updated_shop_item = build_bait_shop_item(item_id, bait_item, bait_purchase_count)
-              Net.update_shop_item(player_id, updated_shop_item)
             end)
           end
         elseif StringUtil.starts_with(item_id, "bait:") then
@@ -402,12 +418,7 @@ function FishingShop.handle_interaction(player_id)
             data.inventory[item_id] = bait_count
             Net.give_player_item(player_id, item_id, count)
 
-            local next_purchase_count = resolve_bait_purchase_count(data, item_id)
-
-            if next_purchase_count ~= count then
-              local updated_shop_item = build_bait_shop_item(item_id, bait_item, next_purchase_count)
-              Net.update_shop_item(player_id, updated_shop_item)
-            end
+            bait_purchased = true
           end)
         elseif StringUtil.starts_with(item_id, "mod:") then
           -- purchase souvenir
@@ -434,6 +445,11 @@ function FishingShop.handle_interaction(player_id)
           end
         else
           print("invalid purchase attempt: " .. item_id)
+        end
+
+        if bait_purchased or data.money ~= prev_money then
+          -- money changed or bait purchased, update bait shop items
+          update_bait_shop_items(player_id, data)
         end
       elseif event_name == "shop_description_request" then
         local description = item_description_map[item_id]
