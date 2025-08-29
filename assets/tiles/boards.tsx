@@ -5,17 +5,22 @@
  <image source="boards.png" width="80" height="106"/>
  <tile id="0">
   <objectgroup draworder="index" id="2">
-   <object id="1" x="15" y="12" width="6.5" height="34.5"/>
+   <object id="1" x="14.5" y="12" width="7" height="34.5"/>
   </objectgroup>
  </tile>
  <tile id="1">
   <objectgroup draworder="index" id="2">
-   <object id="2" x="15" y="12" width="6.5" height="34.5"/>
+   <object id="2" x="14.5" y="12" width="7" height="34.5"/>
   </objectgroup>
  </tile>
  <tile id="2">
   <objectgroup draworder="index" id="2">
-   <object id="1" x="15" y="12" width="6.5" height="34.5"/>
+   <object id="1" x="14.5" y="12" width="7" height="34.5"/>
+  </objectgroup>
+ </tile>
+ <tile id="3">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="14.5" y="12" width="7" height="34.5"/>
   </objectgroup>
  </tile>
 </tileset>

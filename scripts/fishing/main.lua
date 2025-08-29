@@ -81,6 +81,8 @@ for _, id in ipairs(objects) do
     actor_handlers[bot_id] = FishingShop.handle_interaction
   elseif object.name == "Fishing Leaderboard" then
     object_handlers[object.id] = Leaderboard.open
+  elseif object.name == "Fishing Prev Leaderboard" then
+    object_handlers[object.id] = Leaderboard.open_prev
   elseif object.name == "Fishing Journal" then
     object_handlers[object.id] = JournalBoard.open
   end
