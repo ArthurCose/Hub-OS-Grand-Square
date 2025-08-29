@@ -361,7 +361,7 @@ function FishingShop.handle_interaction(player_id)
                 -- todo: add the option for the next upgrade
               end
 
-              local bait_purchase_count = resolve_bait_purchase_count(data, item_id)
+              local bait_purchase_count = resolve_bait_purchase_count(data, bait_id)
               local updated_shop_item = build_bait_shop_item(item_id, bait_item, bait_purchase_count)
               Net.update_shop_item(player_id, updated_shop_item)
             end)
