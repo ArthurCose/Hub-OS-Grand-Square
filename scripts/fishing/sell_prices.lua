@@ -5,7 +5,7 @@ return {
     V2 = 2,
     V3 = 5,
     SP = 10,
-    Rare1 = 20,
-    Rare2 = 25
+    Rare1 = 16,
+    Rare2 = 24
   }
 }
