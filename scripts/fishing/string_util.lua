@@ -17,7 +17,7 @@ function StringUtil.ends_with(s, needle)
     return false
   end
 
-  return s:sub(#s - #needle + 1) == needle
+  return s:sub(- #needle) == needle
 end
 
 ---@param s string
@@ -37,7 +37,7 @@ function StringUtil.strip_suffix(s, needle)
     return s
   end
 
-  return s:sub(1, #s - #needle)
+  return s:sub(1, - #needle - 1)
 end
 
 return StringUtil

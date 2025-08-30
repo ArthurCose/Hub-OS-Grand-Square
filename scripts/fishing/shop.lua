@@ -193,6 +193,29 @@ local function first_interaction(player_id, data)
   end)
 end
 
+
+---@param bait_id string
+---@param count number
+---@return Net.ShopItem
+local function build_bait_shop_item(bait_id, bait_item, count)
+  return {
+    id = bait_id,
+    name = bait_item.name .. " x" .. count,
+    price = bait_item.price * count .. "z"
+  }
+end
+
+---@param upgrade_id string
+---@param prior_upgrade_count number
+---@return Net.ShopItem
+local function build_upgrade_shop_item(upgrade_id, bait_item, prior_upgrade_count)
+  return {
+    id = upgrade_id,
+    name = bait_item.name .. " Up",
+    price = bait_item.upgrade_price[prior_upgrade_count + 1] .. "z"
+  }
+end
+
 ---@param data PlayerFishingData
 ---@param item_id string
 local function resolve_bait_purchase_count(data, item_id)
@@ -212,16 +235,6 @@ local function resolve_bait_purchase_count(data, item_id)
   return math.max(math.min(max_capacity - bait_count, BAIT_PER_PURCHASE, affordable_count), 0)
 end
 
----@param item_id string
----@param count number
----@return Net.ShopItem
-local function build_bait_shop_item(item_id, bait_item, count)
-  return {
-    id = item_id,
-    name = bait_item.name .. " x" .. count,
-    price = bait_item.price * count .. "z"
-  }
-end
 
 ---@param player_id Net.ActorId
 ---@param data PlayerFishingData
@@ -238,6 +251,7 @@ local function update_bait_shop_items(player_id, data)
     end
   end
 end
+
 
 ---@param player_id Net.ActorId
 ---@param data PlayerFishingData
@@ -279,9 +293,9 @@ function FishingShop.handle_interaction(player_id)
     local prev_upgrade_count = 0
 
     for _, id in ipairs(BAIT_IDS) do
-      local upgrade_key = bait_upgrade_id(id)
+      local upgrade_id = bait_upgrade_id(id)
       local item = FishingShop.BAIT_ITEM_MAP[id]
-      local upgrade_count = data.hidden_inventory[upgrade_key] or 0
+      local upgrade_count = data.hidden_inventory[upgrade_id] or 0
 
       if upgrade_count > 0 then
         local count = resolve_bait_purchase_count(data, id)
@@ -289,11 +303,7 @@ function FishingShop.handle_interaction(player_id)
       end
 
       if (upgrade_count > 0 or prev_upgrade_count > 0) and upgrade_count < #item.upgrade_price then
-        shop_items[#shop_items + 1] = {
-          id = upgrade_key,
-          name = item.name .. " Up",
-          price = item.upgrade_price[upgrade_count + 1] .. "z"
-        }
+        shop_items[#shop_items + 1] = build_upgrade_shop_item(upgrade_id, item, upgrade_count)
       end
 
       prev_upgrade_count = upgrade_count
@@ -367,18 +377,31 @@ function FishingShop.handle_interaction(player_id)
                 })
               end
 
-              if count == 1 then
-                -- first purchase, need to add an option to buy the new bait
-                local next_purchase_count = resolve_bait_purchase_count(data, bait_id)
-                local bait_shop_item = {
-                  id = bait_id,
-                  name = bait_item.name .. " x" .. next_purchase_count,
-                  price = bait_item.price * next_purchase_count .. "z"
-                }
+              if count > 1 then
+                -- we don't need to display more shop items on subsequent purchases
+                return
+              end
 
-                Net.prepend_shop_items(player_id, { bait_shop_item }, item_id)
+              -- add an option to buy the new bait
+              local next_purchase_count = resolve_bait_purchase_count(data, bait_id)
+              local bait_shop_item = {
+                id = bait_id,
+                name = bait_item.name .. " x" .. next_purchase_count,
+                price = bait_item.price * next_purchase_count .. "z"
+              }
 
-                -- todo: add the option for the next upgrade
+              Net.prepend_shop_items(player_id, { bait_shop_item }, item_id)
+
+              -- add the option for the next upgrade
+              local bait_level = StringUtil.strip_prefix(bait_id, "bait:")
+              local next_level = tonumber(bait_level) + 1
+              local next_bait_id = "bait:" .. next_level
+              local next_bait_item = FishingShop.BAIT_ITEM_MAP[next_bait_id]
+
+              if next_bait_item then
+                local next_upgrade_id = bait_upgrade_id(next_bait_id)
+                local next_shop_item  = build_upgrade_shop_item(next_upgrade_id, next_bait_item, 0)
+                Net.append_shop_items(player_id, { next_shop_item }, item_id)
               end
             end)
           end
