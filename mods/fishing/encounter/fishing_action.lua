@@ -165,7 +165,7 @@ local function create_reeling_action(user, fish, success_callback)
         max_fight_time = resolve_timing(behavior.fight_timing, distance + 1)
       end
 
-      if fight_timer > max_fight_time then
+      if fight_timer >= max_fight_time then
         local next_tile = user:get_tile(user:facing(), distance + 1)
 
         if next_tile and artifact:can_move_to(next_tile) then

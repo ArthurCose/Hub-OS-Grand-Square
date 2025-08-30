@@ -24,25 +24,25 @@ fish_behavior.Piranha = {
     name = "Piranha",
     rank = "V3",
     slide_timing = { { 6, 12 } },
-    fight_timing = { { 8, 12 }, { 5, 7 } },
+    fight_timing = { { 9, 13 }, { 6, 8 } },
   },
   [Rank.SP] = {
     name = "Piranha",
     rank = "SP",
     slide_timing = { { 8, 10 }, { 6, 8 } },
-    fight_timing = { { 6, 9 }, { 3, 5 }, },
+    fight_timing = { { 7, 10 }, { 4, 6 }, },
   },
   [Rank.Rare1] = {
     name = "Piranha",
     rank = "Rare1",
-    slide_timing = { { 8, 10 }, { 4, 6 } },
-    fight_timing = { { 4, 6 }, { 2, 3 } },
+    slide_timing = { { 8, 10 }, { 5, 7 } },
+    fight_timing = { { 3, 5 }, { 1, 2 } },
   },
   [Rank.Rare2] = {
     name = "Piranha",
     rank = "Rare2",
     slide_timing = { { 6, 8 }, { 4, 8 } },
-    fight_timing = { { 2, 5 }, { 1, 3 } },
+    fight_timing = { { 2, 4 }, { 1, 1 } },
   }
 }
 
