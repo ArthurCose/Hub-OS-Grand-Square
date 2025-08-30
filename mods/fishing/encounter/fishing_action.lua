@@ -1,6 +1,6 @@
 local bn_assets = require("BattleNetwork.Assets")
 local BombLib = require("dev.konstinople.library.bomb")
-local fish_data = require("fish_data")
+local fish_behavior = require("fish_behavior")
 
 local ROD_TEXTURE = Resources.load_texture("fishing_rod.png")
 local ROD_ANIM_PATH = "fishing_rod.animation"
@@ -36,8 +36,8 @@ local function any(list, callback)
 end
 
 ---@param fish Entity
-local function resolve_fish_data(fish)
-  local rank_table = fish_data[fish:name()]
+local function resolve_fish_behavior(fish)
+  local rank_table = fish_behavior[fish:name()]
 
   if not rank_table then
     return nil
@@ -73,7 +73,7 @@ local function create_reeling_action(user, fish, success_callback)
   local reeling = false
   local distance = INITIAL_DISTANCE
   local fish_tile
-  local data = resolve_fish_data(fish) --[[@as GrandSquare.Fishing.FishData]]
+  local behavior = resolve_fish_behavior(fish) --[[@as GrandSquare.Fishing.FishData]]
 
   -- handles movement without modifying callbacks on the fish entity
   local artifact = Artifact.new()
@@ -108,7 +108,7 @@ local function create_reeling_action(user, fish, success_callback)
   action.on_execute_func = function()
     fish_tile = user:get_tile(user:facing(), distance)
 
-    if not data or not fish_tile then
+    if not behavior or not fish_tile then
       action:end_action()
       return
     end
@@ -162,7 +162,7 @@ local function create_reeling_action(user, fish, success_callback)
       -- fight the line!
 
       if fight_timer == 0 then
-        max_fight_time = resolve_timing(data.fight_timing, distance + 1)
+        max_fight_time = resolve_timing(behavior.fight_timing, distance + 1)
       end
 
       if fight_timer > max_fight_time then
@@ -173,7 +173,7 @@ local function create_reeling_action(user, fish, success_callback)
           distance = distance + 1
           fish_tile = next_tile
 
-          artifact:slide(fish_tile, resolve_timing(data.slide_timing, distance))
+          artifact:slide(fish_tile, resolve_timing(behavior.slide_timing, distance))
           return
         end
       end
@@ -187,7 +187,7 @@ local function create_reeling_action(user, fish, success_callback)
 
     -- reel the fish in!
     reeling = true
-    local timing = resolve_timing(data.slide_timing, distance)
+    local timing = resolve_timing(behavior.slide_timing, distance)
 
     local frame_data = { { 3, 4 }, { 4, timing }, { 3, 4 }, { 1, 0 } }
 
@@ -227,7 +227,7 @@ local function create_reeling_action(user, fish, success_callback)
 
     if success and not fish:deleted() then
       Resources.play_audio(SUCCESS_SFX)
-      success_callback(data)
+      success_callback(behavior)
       fish:erase()
     else
       -- resume

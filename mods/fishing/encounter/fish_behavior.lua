@@ -5,9 +5,9 @@
 ---@field fight_timing [number, number][] at most 2 should be defined, fish can't fight at the furthest distance
 
 ---@type table<string, table<Rank, GrandSquare.Fishing.FishData>>
-local fish_data = {}
+local fish_behavior = {}
 
-fish_data.Piranha = {
+fish_behavior.Piranha = {
   [Rank.V1] = {
     name = "Piranha",
     rank = "V1",
@@ -46,7 +46,7 @@ fish_data.Piranha = {
   }
 }
 
-fish_data.RarePira1 = fish_data.Piranha
-fish_data.RarePira2 = fish_data.Piranha
+fish_behavior.RarePira1 = fish_behavior.Piranha
+fish_behavior.RarePira2 = fish_behavior.Piranha
 
-return fish_data
+return fish_behavior
