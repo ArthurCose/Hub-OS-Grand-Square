@@ -241,11 +241,16 @@ end
 
 ---@package
 ---@param tracked_player BattleArena._TrackedPlayer
-function BattleArena:launch_player(tracked_player)
+---@param x number?
+---@param y number?
+function BattleArena:launch_player(tracked_player, x, y)
   local target_x
   local facing_direction
 
-  if tracked_player.x < self.center_x then
+  x = x or tracked_player.x
+  y = y or tracked_player.y
+
+  if x < self.center_x then
     target_x = self.center_x - 3
     facing_direction = "DOWN RIGHT"
   else
@@ -271,9 +276,9 @@ function BattleArena:launch_player(tracked_player)
     },
     {
       properties = {
-        { property = "X", value = target_x,         ease = "Linear" },
-        { property = "Y", value = tracked_player.y, ease = "Linear" },
-        { property = "Z", value = self.z,           ease = "In" }
+        { property = "X", value = target_x, ease = "Linear" },
+        { property = "Y", value = y,        ease = "Linear" },
+        { property = "Z", value = self.z,   ease = "In" }
       },
       duration = duration
     }
@@ -308,7 +313,9 @@ local tracked_players = {}
 
 ---@param tracked_player BattleArena._TrackedPlayer
 ---@param arena? BattleArena
-local function join_arena(tracked_player, arena)
+---@param x number?
+---@param y number?
+local function join_arena(tracked_player, arena, x, y)
   tracked_player.arena = arena
 
   if not arena then
@@ -316,7 +323,7 @@ local function join_arena(tracked_player, arena)
   end
 
   if arena.fight_active then
-    arena:launch_player(tracked_player)
+    arena:launch_player(tracked_player, x, y)
   end
 
   debug_print(tracked_player.id, " joined arena")
@@ -460,7 +467,7 @@ Net:on("player_move", function(event)
 
     if tracked_player.arena ~= overlapped_arena then
       leave_arena(tracked_player)
-      join_arena(tracked_player, overlapped_arena)
+      join_arena(tracked_player, overlapped_arena, position.x, position.y)
     end
   end
 
