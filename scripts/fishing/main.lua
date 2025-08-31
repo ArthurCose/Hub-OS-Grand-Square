@@ -99,6 +99,10 @@ local function resolve_pool_from_hash(hash)
 end
 
 Net:on("actor_interaction", function(event)
+  if Net.is_player_busy(event.player_id) then
+    return
+  end
+
   local listener = actor_handlers[event.actor_id]
   if listener and event.button == 0 then
     listener(event.player_id)
@@ -106,6 +110,10 @@ Net:on("actor_interaction", function(event)
 end)
 
 Net:on("object_interaction", function(event)
+  if Net.is_player_busy(event.player_id) then
+    return
+  end
+
   local listener = object_handlers[event.object_id]
   if listener and event.button == 0 then
     listener(event.player_id)
@@ -115,7 +123,7 @@ end)
 Net:on("tile_interaction", function(event)
   local player_id = event.player_id
 
-  if Net.get_player_area(player_id) ~= area_id then
+  if Net.get_player_area(player_id) ~= area_id or Net.is_player_busy(player_id) then
     return
   end
 
