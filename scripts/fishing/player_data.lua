@@ -54,14 +54,15 @@ function PlayerFishingData.fetch(player_id)
         data = json.decode(contents)
       end
 
+      setmetatable(data, PlayerFishingData)
+      loaded_data[identity] = data
+
       if data.nickname ~= nickname then
         -- keep nickname up to date, this may help with data recovery
         data.nickname = nickname
         data:save(player_id)
       end
 
-      setmetatable(data, PlayerFishingData)
-      loaded_data[identity] = data
       resolve(data)
     end)
   end)
