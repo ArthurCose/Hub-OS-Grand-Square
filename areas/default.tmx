@@ -214,5 +214,6 @@
   <object id="109" name="Fishing Journal" type="Board" gid="2147483714" x="362" y="574" width="40" height="53"/>
   <object id="110" name="Fishing Spot" x="296" y="680" width="14" height="12"/>
   <object id="111" name="Fishing Spot" x="456" y="680" width="68" height="12"/>
+  <object id="117" name="Fishing Prev Leaderboard" type="Board" gid="67" x="285.5" y="616.5" width="40" height="53"/>
  </objectgroup>
 </map>
