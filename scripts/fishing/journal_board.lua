@@ -4,12 +4,13 @@ local PlayerFishingData = require("scripts/fishing/player_data")
 local BOARD_COLOR = { r = 111, g = 159, b = 167 }
 
 local order = {
-  { "Piranha1",  "Piranha", "V1" },
-  { "Piranha2",  "Piranha", "V2" },
-  { "Piranha3",  "Piranha", "V3" },
-  { "PiranhaSP", "Piranha", "SP" },
-  { "RarePira1", "Piranha", "Rare1" },
-  { "RarePira2", "Piranha", "Rare2" }
+  { "Piranha1",  "Piranha",  "V1" },
+  { "Piranha2",  "Piranha",  "V2" },
+  { "Piranha3",  "Piranha",  "V3" },
+  { "PiranhaSP", "Piranha",  "SP" },
+  { "RarePira1", "Piranha",  "Rare1" },
+  { "RarePira2", "Piranha",  "Rare2" },
+  { "SharkMan",  "SharkMan", "V1" },
 }
 
 local JournalBoard = {}

@@ -7,5 +7,6 @@ return {
     SP = 10,
     Rare1 = 18,
     Rare2 = 24
-  }
+  },
+  SharkMan = { V1 = 30 },
 }

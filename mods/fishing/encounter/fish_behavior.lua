@@ -49,4 +49,13 @@ fish_behavior.Piranha = {
 fish_behavior.RarePira1 = fish_behavior.Piranha
 fish_behavior.RarePira2 = fish_behavior.Piranha
 
+fish_behavior.SharkMan = {
+  [Rank.V1] = {
+    name = "SharkMan",
+    rank = "V1",
+    slide_timing = { { 25, 30 }, { 20, 25 } },
+    fight_timing = { { 2, 5 }, { 1, 3 } },
+  },
+}
+
 return fish_behavior

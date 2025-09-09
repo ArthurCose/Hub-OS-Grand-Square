@@ -18,16 +18,18 @@ local cragger_rare2 = { id = cragger_id, rank = Rank.Rare2 }
 
 local pool_weights = {
   -- bait level 1
-  { 7, 1, 0, 0, 0 },
+  { 7, 1, 0, 0, 0, 1 / 100 * 8 },
   -- bait level 2
-  { 1, 2, 0, 0, 0 },
+  { 1, 2, 0, 0, 0, 1 / 250 * 3 },
   -- bait level 3
-  { 0, 1, 4, 0, 0 },
+  { 0, 1, 4, 0, 0, 1 / 100 * 5 },
   -- bait level 4
-  { 0, 1, 4, 5, 0 },
+  { 0, 1, 4, 5, 0, 1 / 50 * 10 },
   -- bait level 5
-  { 0, 0, 1, 6, 2 },
+  { 0, 0, 1, 6, 2, 1 / 25 * 9 },
 }
+
+local BOSS_POOL_START = 6
 
 local enemy_pools = {
   -- unlocked at bait level 1
@@ -66,6 +68,11 @@ local enemy_pools = {
     { piranha_sp,    piranha_rare2, cragger_rare1, cragger_rare2 },
     { piranha_rare2, cragger_v3,    cragger_rare1 },
   },
+
+  -- rare chance for a boss fight
+  {
+    { { id = "BattleNetwork1.SharkMan.Enemy", rank = Rank.V1 } }
+  }
 }
 
 local function resolve_pool_index(bait_level)
@@ -76,7 +83,7 @@ local function resolve_pool_index(bait_level)
     max_weight = max_weight + value
   end
 
-  local target = math.random(max_weight)
+  local target = math.random() * max_weight
   local last_non_zero = 1
 
   for i, value in ipairs(weights) do
@@ -134,12 +141,13 @@ function encounter_init(encounter, data)
   end
 
   local tile_pool = {}
+  local create_hole = data.hole and pool_index < BOSS_POOL_START
 
   for y = 1, Field.height() - 2 do
     for x = blue_start, blue_end do
       local tile = Field.tile_at(x, y) --[[@as Tile]]
 
-      if data.hole and y == 2 and x ~= blue_start and x ~= blue_end then
+      if create_hole and y == 2 and x ~= blue_start and x ~= blue_end then
         tile:set_state(TileState.Void)
       else
         tile:set_team(Team.Blue, Direction.Left)

@@ -4,6 +4,10 @@ id = "GrandSquare.Fishing.Encounter"
 
 [dependencies]
 libraries = ["BattleNetwork.Assets", "dev.konstinople.library.bomb"]
-characters = ["BattleNetwork6.Piranha.Enemy", "BattleNetwork6.Cragger.Enemy"]
+characters = [
+  "BattleNetwork1.SharkMan.Enemy",
+  "BattleNetwork6.Piranha.Enemy",
+  "BattleNetwork6.Cragger.Enemy"
+]
 tile_states = ["BattleNetwork5.TileStates.Sea"]
 statuses = ["GrandSquare.Fishing.HookFishStatus"]
