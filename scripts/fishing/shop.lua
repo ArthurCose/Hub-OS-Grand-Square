@@ -49,7 +49,7 @@ local HELP_DATA = {
   }
 }
 
-local BAIT_IDS = { "bait:1", "bait:2", "bait:3", "bait:4" }
+local BAIT_IDS = { "bait:1", "bait:2", "bait:3", "bait:4", "bait:5" }
 FishingShop.BAIT_ITEM_MAP = {
   ["bait:1"] = {
     name = "url_slug",
