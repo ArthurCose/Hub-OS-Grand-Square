@@ -11,6 +11,7 @@ local order = {
   { "RarePira1", "Piranha",  "Rare1" },
   { "RarePira2", "Piranha",  "Rare2" },
   { "SharkMan",  "SharkMan", "V1" },
+  { "Bass",      "Bass",     "V1" },
 }
 
 local JournalBoard = {}
