@@ -18,15 +18,17 @@ local cragger_rare2 = { id = cragger_id, rank = Rank.Rare2 }
 
 local pool_weights = {
   -- bait level 1
-  { 7, 1, 0, 0, 0, 1 / 100 * 8 },
+  { 7, 1, 0, 0, 0, 1 / 500 * 8, 0 },
   -- bait level 2
-  { 1, 2, 0, 0, 0, 1 / 250 * 3 },
+  { 1, 2, 0, 0, 0, 1 / 250 * 3, 0 },
   -- bait level 3
-  { 0, 1, 4, 0, 0, 1 / 100 * 5 },
+  { 0, 1, 4, 0, 0, 1 / 100 * 5, 0 },
   -- bait level 4
-  { 0, 1, 4, 5, 0, 1 / 50 * 10 },
+  { 0, 1, 4, 5, 0, 1 / 50 * 10, 0 },
   -- bait level 5
-  { 0, 0, 1, 6, 2, 1 / 25 * 9 },
+  { 0, 0, 1, 6, 2, 1 / 25 * 9,  1 / 100 * 9 },
+  -- bait level 6
+  { 0, 0, 0, 5, 3, 1 / 10 * 8,  1 / 20 * 8 },
 }
 
 local BOSS_POOL_START = 6
@@ -72,6 +74,12 @@ local enemy_pools = {
   -- rare chance for a boss fight
   {
     { { id = "BattleNetwork1.SharkMan.Enemy", rank = Rank.V1 } }
+  },
+
+  -- secret boss fight
+  {
+    -- ordered this way so bass appears last
+    { cragger_sp, cragger_sp, piranha_sp, piranha_rare2, { id = "BattleNetwork4.Bass.Enemy", rank = Rank.V1, force_aqua = true } }
   }
 }
 
@@ -135,7 +143,7 @@ function encounter_init(encounter, data)
   local blue_start = 4
   local blue_end = Field.width() - 2
 
-  if pool_index >= 3 and #enemies <= 3 then
+  if (pool_index >= 3 and #enemies <= 3) or pool_index >= BOSS_POOL_START then
     -- increase enemy space to increase difficulty
     blue_start = blue_start - 1
   end
@@ -168,7 +176,14 @@ function encounter_init(encounter, data)
       local column_spawn_count = column_spawn_counts[x] or 0
 
       if column_spawn_count < 2 then
-        encounter:create_spawner(enemy.id, enemy.rank):spawn_at(x, tile:y())
+        local mutator = encounter:create_spawner(enemy.id, enemy.rank):spawn_at(x, tile:y())
+
+        if enemy.force_aqua then
+          mutator:mutate(function(e)
+            e:set_element(Element.Aqua)
+          end)
+        end
+
         column_spawn_counts[x] = column_spawn_count + 1
         break
       end

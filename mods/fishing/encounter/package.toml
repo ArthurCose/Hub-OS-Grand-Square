@@ -6,6 +6,7 @@ id = "GrandSquare.Fishing.Encounter"
 libraries = ["BattleNetwork.Assets", "dev.konstinople.library.bomb"]
 characters = [
   "BattleNetwork1.SharkMan.Enemy",
+  "BattleNetwork4.Bass.Enemy",
   "BattleNetwork6.Piranha.Enemy",
   "BattleNetwork6.Cragger.Enemy"
 ]

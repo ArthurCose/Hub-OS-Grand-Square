@@ -9,4 +9,5 @@ return {
     Rare2 = 24
   },
   SharkMan = { V1 = 30 },
+  Bass = { V1 = 30 },
 }

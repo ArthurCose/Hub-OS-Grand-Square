@@ -58,4 +58,13 @@ fish_behavior.SharkMan = {
   },
 }
 
+fish_behavior.Bass = {
+  [Rank.V1] = {
+    name = "Bass",
+    rank = "V1",
+    slide_timing = { { 6, 8 }, { 4, 8 } },
+    fight_timing = { { 1, 3 }, { 1, 1 } },
+  },
+}
+
 return fish_behavior

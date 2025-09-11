@@ -82,12 +82,12 @@ FishingShop.BAIT_ITEM_MAP = {
     -- unlocks after ~125 PiranhaSPs
     upgrade_price = { 1200, 200, 300, 400 }
   },
-  -- ["bait:5"] = {
-  --   name = "BugCrumb",
-  --   description = "Lvl 5 Fish Bait\n\nAffects rank",
-  --   price = 5,
-  --   upgrade_price = { 3000, 1000, 2000 }
-  -- }
+  ["bait:5"] = {
+    name = "BugCrumb",
+    description = "Lvl 5 Fish Bait\n\nAffects rank",
+    price = 5,
+    upgrade_price = { 3000, 1000, 2000, 3000 }
+  }
 }
 
 local MOD_ITEM_IDS = { "mod:fish_chip" }

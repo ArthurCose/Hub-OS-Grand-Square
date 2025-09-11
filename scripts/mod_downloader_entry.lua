@@ -12,6 +12,7 @@ local package_ids = {
   "BattleNetwork5.Powie",
   -- fishing
   "BattleNetwork1.SharkMan",
+  "BattleNetwork4.Bass",
   "BattleNetwork6.Cragger",
   "BattleNetwork6.Piranha",
   "BattleNetwork5.TileStates.Sea",
