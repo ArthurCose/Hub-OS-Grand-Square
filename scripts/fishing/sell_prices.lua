@@ -8,6 +8,6 @@ return {
     Rare1 = 18,
     Rare2 = 24
   },
-  SharkMan = { V1 = 30 },
-  Bass = { V1 = 30 },
+  SharkMan = { V1 = 35 },
+  Bass = { V1 = 50 },
 }
