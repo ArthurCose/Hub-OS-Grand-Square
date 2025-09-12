@@ -85,6 +85,7 @@ FishingShop.BAIT_ITEM_MAP = {
   ["bait:5"] = {
     name = "BugCrumb",
     description = "Lvl 5 Fish Bait\n\nAffects rank",
+    consumable = true,
     price = 5,
     upgrade_price = { 3000, 1000, 2000, 3000 }
   }
