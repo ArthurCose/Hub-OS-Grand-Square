@@ -16,6 +16,7 @@ local spawn_pattern = {
 
 function encounter_init(encounter, data)
   encounter:set_turn_limit(15)
+  encounter:set_time_freeze_chain_limit(TimeFreezeChainLimit.Unlimited)
   HitDamageJudge.init(encounter)
   SpectatorFun.init(encounter)
 

@@ -175,8 +175,8 @@ Compare = {
 ---@enum DefensePriority
 DefensePriority = {
   Barrier = 0,
-  Body = 0,
   Action = 0,
+  Body = 0,
   Trap = 0,
   Last = 0,
 }
@@ -197,6 +197,13 @@ ActionType = {
   Scripted = 0,
 }
 
+---@enum TimeFreezeChainLimit
+TimeFreezeChainLimit = {
+  OnePerTeam = 0,
+  OnePerEntity = 0,
+  Unlimited = 0,
+}
+
 ---@enum Shadow
 Shadow = {
   None = "",
@@ -208,13 +215,13 @@ Shadow = {
 ---@enum Hit
 ---@type { [string]: Hit }
 Hit = {}
+Hit.None = Hit._
 Hit.RetainIntangible = Hit._
 Hit.NoCounter = Hit._
 Hit.Drag = Hit._
-Hit.Impact = Hit._
+Hit.Drain = Hit._
 Hit.Flinch = Hit._
 Hit.Flash = Hit._
-Hit.Shake = Hit._
 Hit.PierceInvis = Hit._
 Hit.PierceGuard = Hit._
 Hit.PierceGround = Hit._
@@ -292,9 +299,13 @@ Input = {
 
 --- Most of these functions will throw if the entity has been erased. `entity:will_erase_eof()` and `entity:deleted()` will never throw and can be used to see if the entity is still safe to use.
 ---@class Entity
---- Called after processing damage on the entity, if damage isn't blocked by [DefenseRules](https://docs.hubos.dev/client/lua-api/defense-api/defense-rule).
+--- Called after processing defenses on the hit entity, if damage isn't blocked by [DefenseRules](https://docs.hubos.dev/client/lua-api/defense-api/defense-rule).
+---
+--- Commonly used for spawning hit particles or applying secondary effects.
 ---@field on_attack_func fun(self: Entity, entity: Entity)
 --- Called when the spell hits an entity and isn't blocked by [intangibility](https://docs.hubos.dev/client/lua-api/entity-api/living#livingset_intangibleintangible-intangible_rule).
+---
+--- Commonly used by spells that delete on collision.
 ---@field on_collision_func fun(self: Entity, entity: Entity)
 --- Called at the start of the intro state (the state before card select first opens).
 ---
@@ -735,10 +746,9 @@ Drag.None = nil
 --- - `Hit.RetainIntangible` prevents intangibility from being lost if the attack pierces.
 --- - `Hit.NoCounter` prevents the attack from countering.
 --- - `Hit.Drag` Allows the [drag property](https://docs.hubos.dev/client/lua-api/attack-api/hit-props#hit_propsdrag) to drag the entity.
---- - `Hit.Impact` allows the attack to counter the entity and causes the entity to appear white for one frame.
+--- - `Hit.Drain` disables the hit flash and countering, most defense rules should check for Drain to ignore hits.
 --- - `Hit.Flinch` read by the hit entity to cancel attacks and play a flinch animation.
 --- - `Hit.Flash` applies the default intangible rule to the hit entity and flickers the entity's sprite.
---- - `Hit.Shake` causes the hit entity to shake.
 --- - `Hit.PierceInvis` read by defense rules to pierce defenses.
 --- - `Hit.PierceGuard` read by defense rules to pierce defenses.
 --- - `Hit.PierceGround` read by defense rules to pierce defenses.
@@ -803,6 +813,9 @@ DeckCard = {}
 ---@field code string
 --- Number, used by other mods for conditional behavior.
 ---@field recover number
+--- Number, represents the increase in damage from boosts. You should also modify `damage` when adjusting this value, as `damage` represents the final damage value.
+--- Subtract this value from `damage` to get the original damage value.
+---@field boosted_damage number
 --- Number, influences generated [HitProps](https://docs.hubos.dev/client/lua-api/attack-api/hit-props).
 ---
 --- Displayed during time freeze.
@@ -1095,6 +1108,16 @@ function Entity:hide() end
 --- Same as `entity:sprite():reveal()`
 function Entity:reveal() end
 
+--- Returns a number.
+---
+--- Same as `entity:sprite():layer()`
+---@return number
+function Entity:layer() end
+
+--- Same as `entity:sprite():set_layer(layer)`
+---@param layer number
+function Entity:set_layer(layer) end
+
 --- Returns [Color](https://docs.hubos.dev/client/lua-api/resource-api/sprite#color)
 ---
 --- Same as `entity:sprite():color()`
@@ -1120,6 +1143,10 @@ function Entity:set_never_flip(never_flip) end
 --- Same as `entity:sprite():create_node()`
 ---@return Sprite
 function Entity:create_node() end
+
+--- Same as `entity:sprite():remove_node(sprite)`
+---@param sprite Sprite
+function Entity:remove_node(sprite) end
 
 --- Returns a [SyncNode](https://docs.hubos.dev/client/lua-api/resource-api/sprite#syncnode).
 ---@return SyncNode
@@ -1175,6 +1202,22 @@ function Entity:create_component(lifetime) end
 --- Make sure to obtain context in card_init and not within a callback for countering.
 ---@return AttackContext
 function Entity:context() end
+
+--- Starts a new context using the specified [action type](https://docs.hubos.dev/client/lua-api/defense-api/aux-prop#aux_proprequire_actionaction_types).
+--- Not necessary, but useful for actions queued in a script context.
+---
+--- ```lua
+--- player.on_update_func = function()
+---   if player:input_has(Input.Pressed.Left) and not player:is_inactionable() and not player:has_actions() then
+---     player:start_context(ActionType.Normal) -- may activate AuxProps which can influence HitProps using context
+---
+---     local action = Action.new(player, "CHARACTER_SHOOT")
+---     player:queue_action(action)
+---   end
+--- end
+--- ```
+---@param action_type ActionType
+function Entity:start_context(action_type) end
 
 --- Returns true if the entity has an executing action or pending actions.
 ---@return boolean
@@ -1545,6 +1588,14 @@ function Entity:load_emotions_animation(path) end
 ---@return boolean
 function Entity:input_has(input_query) end
 
+--- Returns a number, represents the configured input delay for this player.
+---
+--- Useful for timing based selection, most mods will not need to use this value.
+---
+--- Throws if the Entity doesn't pass [Player.from()](https://docs.hubos.dev/client/lua-api/entity-api/player)
+---@return number
+function Entity:input_delay() end
+
 --- - `path`: file path relative to script file, use values returned from `Resources.load_audio()` for better performance.
 --- - `audio_behavior`: [AudioBehavior](https://docs.hubos.dev/client/lua-api/resource-api/resources#audiobehavior)
 ---
@@ -1565,7 +1616,15 @@ function Entity:play_audio(path, audio_behavior) end
 ---@param color Color
 function Entity:set_fully_charged_color(color) end
 
---- Sets the offset of the fully charged sprite.
+--- Returns `{ x: number, y: number }`.
+---
+--- This table represents the offset for the attack charge animation.
+---
+--- Throws if the Entity doesn't pass [Player.from()](https://docs.hubos.dev/client/lua-api/entity-api/player)
+---@return { x: number, y: number }
+function Entity:charge_position() end
+
+--- Sets the offset for the attack charge animation.
 ---
 --- Throws if the Entity doesn't pass [Player.from()](https://docs.hubos.dev/client/lua-api/entity-api/player)
 ---@param x number
@@ -2409,6 +2468,12 @@ function Resources.stop_music() end
 ---@param path string
 ---@param loops? boolean
 function Resources.play_music(path, loops) end
+
+--- Returns [Color](https://docs.hubos.dev/client/lua-api/resource-api/sprite#color), tied to the Flash Brightness setting and seen as the color used for transitions to white.
+---
+--- Be careful when reading properties from the returned value, as settings will differ between players, and driving logic using these values can cause each client to desync.
+---@return Color
+function Resources.white_flash_color() end
 
 --- Returns true if the index represents the local player.
 ---@param player_index number
@@ -3314,6 +3379,13 @@ function Encounter:enable_automatic_turn_end(enabled) end
 ---@param limit number
 function Encounter:set_turn_limit(limit) end
 
+--- - `chain_limit`
+---   - `TimeFreezeChainLimit.OnePerTeam` the default, only the last time freeze action from each team will be used.
+---   - `TimeFreezeChainLimit.OnePerEntity` only the last time freeze action from each entity will be used.
+---   - `TimeFreezeChainLimit.Unlimited` every time freeze action in the chain will be used.
+---@param chain_limit TimeFreezeChainLimit
+function Encounter:set_time_freeze_chain_limit(chain_limit) end
+
 --- - `enable`: defaults to true.
 --- - `player_index`: starts at 0, if unset applies to all players.
 ---
@@ -3642,8 +3714,8 @@ function TurnGauge.turn_limit() end
 
 --- - `priority`
 ---   - `DefensePriority.Barrier`
----   - `DefensePriority.Body`
 ---   - `DefensePriority.Action`
+---   - `DefensePriority.Body`
 ---   - `DefensePriority.Trap`
 ---     - Additionally causes all players to see `????` in the UI
 ---   - `DefensePriority.Last`
@@ -3666,18 +3738,18 @@ function DefenseRule:replaced() end
 --- Prevents damage and statuses from applying to the defending entity.
 function Defense:block_damage() end
 
---- Used to mark `Hit.Impact` as handled / retaliated.
----
---- Does not strip `Hit.Impact`.
-function Defense:block_impact() end
-
 --- Returns true if `defense:block_damage()` was called.
 ---@return boolean
 function Defense:damage_blocked() end
 
---- Returns true if `defense:block_impact()` was called.
+--- Used to track if the defense retaliated against a hit, such spawning an attack in Reflect / Shields.
+function Defense:set_responded() end
+
+--- Returns true if `defense:set_responded()` was called for this hit.
+---
+--- Used to track if the defense retaliated against a hit, such spawning an attack in Reflect / Shields.
 ---@return boolean
-function Defense:impact_blocked() end
+function Defense:responded() end
 
 --- Returns a new IntangibleRule.
 ---@return IntangibleRule
@@ -3940,6 +4012,14 @@ function AuxProp:require_card_time_freeze(time_freeze) end
 ---@param tag string
 ---@return AuxProp
 function AuxProp:require_card_tag(tag) end
+
+--- - Body priority
+--- - `tag`: string
+---
+--- The AuxProp will check the next card on the attached entity for matching tag.
+---@param tag string
+---@return AuxProp
+function AuxProp:require_card_not_tag(tag) end
 
 --- - HP Expression priority
 --- - `expr`: [Math Expression String](https://docs.hubos.dev/client/lua-api/defense-api/aux-prop#math-expression-strings), `"DAMAGE"` will represent the total damage value for all incoming hits.
