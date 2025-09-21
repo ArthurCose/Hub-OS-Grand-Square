@@ -1,2 +1,5 @@
 [packages]
-id_blacklist = ["BattleNetwork3.Program02.BreakBuster"]
+id_blacklist = [
+  "BattleNetwork3.Program02.BreakBuster",
+  "dev.GladeWoodsgrove.SwitchDrives.DEBUG_GAUGE"
+]
