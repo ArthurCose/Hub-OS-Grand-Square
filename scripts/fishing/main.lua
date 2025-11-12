@@ -318,7 +318,9 @@ local player_count = 0
 
 local function updated_player_count()
   pond_pool.max_ripple_encounters = math.max(2, 2 * player_count)
-  print("player count: " .. player_count)
+
+  local date = os.date("*t")
+  print("[" .. date.hour .. ":" .. date.min .. "] player count: " .. player_count)
 end
 
 Net:on("player_request", function()
