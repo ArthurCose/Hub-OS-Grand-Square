@@ -228,11 +228,11 @@ function create_post(player_id, board, title, text)
     end
   end
 
-  push_post(board_name, post)
-
   board_data.posts[#board_data.posts + 1] = post
   save_data[board_name] = board_data
   save()
+
+  push_post(board_name, post)
 end
 
 function contains_only_whitespace(text)
@@ -273,7 +273,7 @@ function push_post(board_name, post)
   local new_posts = { post }
 
   for player_id, player_state in pairs(player_states) do
-    if player_state.board.custom_properties.Name == board_name then
+    if player_state.board and player_state.board.custom_properties.Name == board_name then
       push_func(player_id, new_posts, next_id)
     end
   end
