@@ -240,7 +240,8 @@ function contains_only_whitespace(text)
 end
 
 function sanitize_title(text, limit)
-  return string.sub(string.gsub(text, "[\t\r\n]", " ", limit), 1, limit)
+  text = string.gsub(text, "[\t\r\n]", " ", limit)
+  return string.sub(text, 1, utf8.offset(text, limit))
 end
 
 function push_post(board_name, post)
