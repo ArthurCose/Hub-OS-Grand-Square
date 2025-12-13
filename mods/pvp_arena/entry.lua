@@ -52,4 +52,26 @@ function encounter_init(encounter, data)
       encounter:mark_spectator(i)
     end
   end
+
+  if active_player_count > 2 then
+    -- prevent enemy teams from owning certain columns in a multibattle
+    -- set to Team.Other instead
+
+    local artifact = Artifact.new()
+    local component = artifact:create_component(Lifetime.Scene)
+    component.on_update_func = function()
+      local function neutralize_column(x)
+        for y = 0, Field.height() - 1 do
+          local tile = Field.tile_at(x, y)
+
+          if tile and tile:team() ~= tile:original_team() and tile:team() ~= Team.Other then
+            tile:set_team(Team.Other, tile:facing())
+          end
+        end
+      end
+
+      neutralize_column(2)
+      neutralize_column(Field.width() - 3)
+    end
+  end
 end
