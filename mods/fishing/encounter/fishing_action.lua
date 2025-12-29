@@ -229,6 +229,7 @@ local function create_reeling_action(user, fish, success_callback)
       Resources.play_audio(SUCCESS_SFX)
       success_callback(behavior)
       fish:erase()
+      fish:hide()
     else
       -- resume
       TurnGauge.set_enabled(true)
