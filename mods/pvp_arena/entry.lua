@@ -14,6 +14,7 @@ local spawn_pattern = {
   { 2, 3 }, -- bottom
 }
 
+---@param encounter Encounter
 function encounter_init(encounter, data)
   encounter:set_turn_limit(15)
   encounter:set_time_freeze_chain_limit(TimeFreezeChainLimit.Unlimited)
@@ -74,4 +75,7 @@ function encounter_init(encounter, data)
       neutralize_column(Field.width() - 3)
     end
   end
+
+  -- by LDR's request
+  encounter:set_entities_share_ownership(false)
 end

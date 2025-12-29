@@ -139,8 +139,9 @@ Playback = {
 
 ---@enum ColorMode
 ColorMode = {
-  Additive = 0,
+  Add = 0,
   Multiply = 0,
+  Adopt = 0,
 }
 
 ---@enum SpriteShaderEffect
@@ -434,7 +435,7 @@ Action = {}
 --- - `attacker`: [Entity](https://docs.hubos.dev/client/lua-api/entity-api/entity)
 --- - `defender`: [Entity](https://docs.hubos.dev/client/lua-api/entity-api/entity)
 --- - `hit_props`: [HitProps](https://docs.hubos.dev/client/lua-api/attack-api/hit-props)
----@field defense_func fun(defense: Defense, attacker: Entity, defender: Entity, hit_props: HitProps)
+---@field defense_func fun(defense: Defense, attacker?: Entity, defender: Entity, hit_props: HitProps)
 --- Called when a DefenseRule with the same priority replaced this rule.
 ---@field on_replace_func fun()
 DefenseRule = {}
@@ -643,6 +644,8 @@ CustomTileState = {}
 
 --- A global sprite node, used to add sprites to the HUD.
 ---
+--- Hiding this node will also hide engine Hud elements.
+---
 --- ```lua
 --- local sprite = Hud:create_node()
 --- ```
@@ -766,6 +769,8 @@ HitProps = {}
 
 --- A card sitting in a [Player's](https://docs.hubos.dev/client/lua-api/entity-api/player) deck.
 ---@class DeckCard
+--- Undefined type, used to resolve to an [Action](https://docs.hubos.dev/client/lua-api/attack-api/action).
+---@field namespace Namespace?
 --- String, passed to [CardProperties.from_package()](https://docs.hubos.dev/client/lua-api/attack-api/cards#cardpropertiesfrom_packagepackage_id-code).
 ---@field code string
 --- String, passed to [CardProperties.from_package()](https://docs.hubos.dev/client/lua-api/attack-api/cards#cardpropertiesfrom_packagepackage_id-code).
@@ -813,6 +818,10 @@ DeckCard = {}
 ---@field code string
 --- Number, used by other mods for conditional behavior.
 ---@field recover number
+--- Boolean or nil, decides whether `function card_dynamic_damage(entity): number` should be called to resolve damage on frames where this card is unused and visible.
+---
+--- [CardProperties.resolve_damage()](https://docs.hubos.dev/client/lua-api/attack-api/cards#cardpropertiesresolve_damagecard_properties-entity) can be used to calculate the latest damage value.
+---@field dynamic_damage boolean
 --- Number, represents the increase in damage from boosts. You should also modify `damage` when adjusting this value, as `damage` represents the final damage value.
 --- Subtract this value from `damage` to get the original damage value.
 ---@field boosted_damage number
@@ -823,7 +832,7 @@ DeckCard = {}
 --- String, displayed during time freeze.
 ---@field short_name string
 --- Undefined type, used for resolving to an [Action](https://docs.hubos.dev/client/lua-api/attack-api/action).
----@field namespace Namespace
+---@field namespace Namespace?
 --- String, used for resolving to an [Action](https://docs.hubos.dev/client/lua-api/attack-api/action).
 ---@field package_id string
 
@@ -928,7 +937,9 @@ function Entity:element() end
 ---@param element Element
 function Entity:set_element(element) end
 
---- Returns the facing [Direction](https://docs.hubos.dev/client/lua-api/field-api/direction) of the entity, used by attacks to decide which direction to move in.
+--- Returns the facing [Direction](https://docs.hubos.dev/client/lua-api/field-api/direction) of the entity.
+---
+--- Many mods use this to decide which direction to move in.
 ---@return Direction
 function Entity:facing() end
 
@@ -938,8 +949,14 @@ function Entity:facing() end
 ---@return Direction
 function Entity:facing_away() end
 
---- Sets the facing [Direction](https://docs.hubos.dev/client/lua-api/field-api/direction) of the entity, used by attacks to decide which direction to move in.
+--- Returns the facing [Direction](https://docs.hubos.dev/client/lua-api/field-api/direction) of the entity.
+---
+--- Used by the engine to resolve how to display the visual based on perspective.
+--- This should be set to either `Direction.Left` or `Direction.Right` generally.
+---
+--- Many mods use this to decide which direction to move in.
 ---@param direction Direction
+---@return Direction
 function Entity:set_facing(direction) end
 
 --- Returns the [Team](https://docs.hubos.dev/client/lua-api/entity-api/entity#entityset_teamteam) of the entity
@@ -969,6 +986,8 @@ function Entity:owner() end
 --- Marks a team or entity as the owner of this entity. If `team_or_entity` is unset the entity will be reverted to having no owner.
 ---
 --- If a team or entity has too many entities claimed, the oldest claimed entity will be deleted.
+---
+--- By default, entities can own one other entity, teams can own two entities.
 ---@param team_or_entity? Team|Entity
 function Entity:set_owner(team_or_entity) end
 
@@ -1423,6 +1442,19 @@ function Entity:add_defense_rule(defense_rule) end
 ---@param defense_rule DefenseRule
 function Entity:remove_defense_rule(defense_rule) end
 
+--- Removes the first defense with the matching priority and calls its [replace callback](https://docs.hubos.dev/client/lua-api/defense-api/defense-rule#defense_ruleon_replace_func--function).
+---
+--- Throws if the Entity doesn't pass [Living.from()](https://docs.hubos.dev/client/lua-api/entity-api/living)
+---@param defense_priority DefensePriority
+function Entity:remove_defense(defense_priority) end
+
+--- Returns true if the entity has a defense rule with a matching priority.
+---
+--- Throws if the Entity doesn't pass [Living.from()](https://docs.hubos.dev/client/lua-api/entity-api/living)
+---@param defense_priority DefensePriority
+---@return boolean
+function Entity:has_defense(defense_priority) end
+
 --- - `aux_prop`: [AuxProp](https://docs.hubos.dev/client/lua-api/defense-api/aux-prop)
 ---
 --- Throws if the Entity doesn't pass [Living.from()](https://docs.hubos.dev/client/lua-api/entity-api/living)
@@ -1450,6 +1482,14 @@ function Entity:apply_status(hit_flag, duration) end
 --- Throws if the Entity doesn't pass [Living.from()](https://docs.hubos.dev/client/lua-api/entity-api/living)
 ---@param hit_flags Hit | number
 function Entity:remove_status(hit_flags) end
+
+--- Returns a number, representing the hit flags the entity is currently immune to.
+---
+--- This won't cover checks inside of statuses, such as a the `CHARACTER_HIT` animation required by `Hit.Flinch`
+---
+--- Throws if the Entity doesn't pass [Living.from()](https://docs.hubos.dev/client/lua-api/entity-api/living)
+---@return number
+function Entity:status_immunities() end
 
 --- - `hit_flag` a single hit flag, see [HitProps](https://docs.hubos.dev/client/lua-api/attack-api/hit-props)
 ---
@@ -1548,6 +1588,12 @@ function Entity:emotions_texture() end
 ---@return string
 function Entity:emotions_animation_path() end
 
+--- Returns a [Sprite](https://docs.hubos.dev/client/lua-api/resource-api/sprite)
+---
+--- Throws if the Entity doesn't pass [Player.from()](https://docs.hubos.dev/client/lua-api/entity-api/player)
+---@return Sprite
+function Entity:emotion_node() end
+
 --- - `path`: file path relative to script file, use values returned from `Resources.load_texture()` for better performance.
 ---
 --- Throws if the Entity doesn't pass [Player.from()](https://docs.hubos.dev/client/lua-api/entity-api/player)
@@ -1595,6 +1641,26 @@ function Entity:input_has(input_query) end
 --- Throws if the Entity doesn't pass [Player.from()](https://docs.hubos.dev/client/lua-api/entity-api/player)
 ---@return number
 function Entity:input_delay() end
+
+--- Stores a value that can be read in future battles.
+---
+--- Throws if the Entity doesn't pass [Player.from()](https://docs.hubos.dev/client/lua-api/entity-api/player)
+---@param key string
+---@param number_or_string number|string
+function Entity:remember(key, number_or_string) end
+
+--- Returns a number, string, or nil, store values with to [player:remember()](https://docs.hubos.dev/client/lua-api/entity-api/player#playerrememberkey-number_or_string)
+---
+--- Throws if the Entity doesn't pass [Player.from()](https://docs.hubos.dev/client/lua-api/entity-api/player)
+---@param key string
+---@return number|string|nil
+function Entity:recall(key) end
+
+--- Clears a value stored through [player:remember()](https://docs.hubos.dev/client/lua-api/entity-api/player#playerrememberkey-number_or_string)
+---
+--- Throws if the Entity doesn't pass [Player.from()](https://docs.hubos.dev/client/lua-api/entity-api/player)
+---@param key string
+function Entity:forget(key) end
 
 --- - `path`: file path relative to script file, use values returned from `Resources.load_audio()` for better performance.
 --- - `audio_behavior`: [AudioBehavior](https://docs.hubos.dev/client/lua-api/resource-api/resources#audiobehavior)
@@ -2792,10 +2858,11 @@ function Sprite:set_color(color) end
 function Sprite:color_mode() end
 
 --- - `color_mode`
----   - `ColorMode.Additive` each pixel will be added by the sprite's color, alpha will be multiplied.
+---   - `ColorMode.Add` each pixel will be added by the sprite's color, alpha will be multiplied.
 ---   - `ColorMode.Multiply` each pixel will be multiplied by the sprite's color.
+---   - `ColorMode.Adopt` the RGB components of the sprite's color will be directly used, alpha will be multiplied.
 ---
---- The color mode will be reset to `ColorMode.Additive` at the start of the next frame for root sprites.
+--- The color mode will be reset to `ColorMode.Add` at the start of the next frame for root sprites.
 ---@param color_mode ColorMode
 function Sprite:set_color_mode(color_mode) end
 
@@ -2856,6 +2923,7 @@ function Color.mix(color_a, color_b, progress) end
 ---     - `"THIN"`
 ---     - `"THIN_SMALL"`
 ---     - `"MENU_TITLE"`
+---     - `"NAVIGATION"`
 ---     - `"MICRO"`
 ---     - `"CONTEXT"`
 ---     - `"CODE"`
@@ -2866,6 +2934,8 @@ function Color.mix(color_a, color_b, progress) end
 ---     - `"RESULT"`
 ---     - `"BATTLE"`
 ---     - `"ENTITY_HP"`
+---     - `"ENTITY_HP_RED"`
+---     - `"ENTITY_HP_GREEN"`
 ---   - `texture_path`: Required for custom fonts.
 ---   - `animation_path`: Required for custom fonts.
 ---
@@ -3002,17 +3072,6 @@ function Field.find_tiles(callback) end
 ---@param duration number
 function Field.shake(strength, duration) end
 
---- Deprecated. Use [entity:on_delete()](https://docs.hubos.dev/client/lua-api/entity-api/entity#entityon_deletefunctionentity) instead.
----@param target_id EntityId
----@param observer_id EntityId
----@param callback fun(entity: Entity)
-function Field.notify_on_delete(target_id, observer_id, callback) end
-
---- Deprecated. Use [entity:on_delete()](https://docs.hubos.dev/client/lua-api/entity-api/entity#entityon_deletefunctionentity) instead.
----@param id EntityId
----@param callback fun(entity: Entity)
-function Field.callback_on_delete(id, callback) end
-
 --- Causes tiles in the column to return to the matching team as soon as possible, starting at the next frame. The transfer will be delayed by tile reservations in the column.
 ---@param x number
 ---@param team Team
@@ -3071,6 +3130,11 @@ function Tile:is_edge() end
 ---@return boolean
 function Tile:is_walkable() end
 
+--- Returns true as long as there are no reservations by entities where [entity:sharing_tile()](https://docs.hubos.dev/client/lua-api/entity-api/entity#entitysharing_tile) is false, excluding [entities with ids](https://docs.hubos.dev/client/lua-api/entity-api/entity#entityid) matching the `exclude_list`.
+---@param exclude_list? EntityId[]
+---@return boolean
+function Tile:is_shareable(exclude_list) end
+
 --- Returns true if there's any reservations for this tile, excluding [entities with ids](https://docs.hubos.dev/client/lua-api/entity-api/entity#entityid) matching the `exclude_list`.
 ---@param exclude_list? EntityId[]
 ---@return boolean
@@ -3120,6 +3184,10 @@ function Tile:facing() end
 --- Sets the facing direction used to set the initial direction of spawned entities, as well as for resolving reverting team.
 ---@param direction Direction
 function Tile:set_facing(direction) end
+
+--- Returns a [Direction](https://docs.hubos.dev/client/lua-api/field-api/direction)
+---@return Direction
+function Tile:original_facing() end
 
 --- - `highlight`
 ---   - `Highlight.None`
@@ -3222,6 +3290,18 @@ function Direction.flip_y(direction) end
 ---@param direction Direction
 ---@return Direction
 function Direction.reverse(direction) end
+
+--- Returns two directions, a horizontal direction and vertical direction.
+---
+--- ```lua
+--- local x_dir, y_dir = Direction.split(Direction.UpLeft)
+---
+--- assert(x_dir == Direction.Left)
+--- assert(y_dir == Direction.Up)
+--- ```
+---@param direction Direction
+---@return Direction, Direction
+function Direction.split(direction) end
 
 --- Joins two directions into a single direction.
 ---
@@ -3386,6 +3466,20 @@ function Encounter:set_turn_limit(limit) end
 ---@param chain_limit TimeFreezeChainLimit
 function Encounter:set_time_freeze_chain_limit(chain_limit) end
 
+--- How many entities can be owned by the team before old entities start deleting, 2 by default.
+---@param limit number
+function Encounter:set_team_owner_limit(limit) end
+
+--- How many entities can be owned by an entity before old entities start deleting, 1 by default.
+---@param limit number
+function Encounter:set_entity_owner_limit(limit) end
+
+--- Decides whether the entity owner limit is shared between the team or is tied directly to the owner, true by default.
+---
+--- If the entity owner limit is 1, there can only be one entity owned by any member of the team when this is true, otherwise there can be one for each unique owner.
+---@param share? boolean
+function Encounter:set_entities_share_ownership(share) end
+
 --- - `enable`: defaults to true.
 --- - `player_index`: starts at 0, if unset applies to all players.
 ---
@@ -3499,11 +3593,13 @@ function Action:create_attachment(point_name) end
 function Action:override_animation_frames(frame_data) end
 
 --- Same as calling `action:owner():animation():on_frame(frame_index, callback)` within [action.on_execute_func](https://docs.hubos.dev/client/lua-api/attack-api/action#actionon_execute_func--functionself-owner)
----
---- See [animation:on_frame()](https://docs.hubos.dev/client/lua-api/resource-api/animation#animationon_frameframe_index-function-do_once)
 ---@param frame_index number
 ---@param callback fun()
-function Action:add_anim_action(frame_index, callback) end
+function Action:on_anim_frame(frame_index, callback) end
+
+--- Adds a callback to run before [action.on_action_end_func](https://docs.hubos.dev/client/lua-api/attack-api/action#actionon_action_end_func--functionself)
+---@param callback fun()
+function Action:on_end(callback) end
 
 --- Calls [action.on_action_end_func](https://docs.hubos.dev/client/lua-api/attack-api/action#actionon_action_end_func--functionself)
 ---
@@ -3621,6 +3717,14 @@ function Hit.duration_for(hit_flag, level) end
 ---@return number
 function Hit.mutual_exclusions_for(hit_flag) end
 
+--- Returns a number, representing all of the hit flags of statuses that have `blocks_actions` set to true.
+---@return number
+function Hit.action_blockers() end
+
+--- Returns a number, representing all of the hit flags of statuses that have `blocks_mobility` set to true.
+---@return number
+function Hit.mobility_blockers() end
+
 --- Returns true if `element_a` is weak to `element_b`.
 ---@param element_a Element
 ---@param element_b Element
@@ -3647,6 +3751,12 @@ function CardProperties.from_package(package_id, code) end
 ---@param card_properties CardProperties
 ---@return string
 function CardProperties.icon_texture(card_properties) end
+
+--- Returns a number, representing the resolved damage.
+---@param card_properties CardProperties
+---@param entity Entity
+---@return number
+function CardProperties.resolve_damage(card_properties, entity) end
 
 --- Returns an [Entity](https://docs.hubos.dev/client/lua-api/entity-api/entity), represents the entity affected by the status.
 ---@return Entity
@@ -3859,6 +3969,12 @@ function AuxProp:require_element(element) end
 --- The AuxProp will check `entity:ignoring_negative_tile_effects() == false`.
 ---@return AuxProp
 function AuxProp:require_negative_tile_interaction() end
+
+--- - Body Priority
+---
+--- Applies when a new `entity:context()` has started.
+---@return AuxProp
+function AuxProp:require_context_start() end
 
 --- - Body Priority
 --- - `action_types`
@@ -4098,6 +4214,26 @@ function AuxProp:intercept_action(callback) end
 ---@param callback fun(action: Action)
 ---@return AuxProp
 function AuxProp:interrupt_action(callback) end
+
+--- - Increase Pre Hit Damage priority
+--- - `expr`: [Math Expression String](https://docs.hubos.dev/client/lua-api/defense-api/aux-prop#math-expression-strings), `"DAMAGE"` will represent the damage value for the current hit before any modifications.
+---
+--- The result of `expr` will be added to the total incoming damage.
+---
+--- If the result is negative, it will be clamped to 0.
+---@param expr string
+---@return AuxProp
+function AuxProp:increase_pre_hit_damage(expr) end
+
+--- - Decrease Pre Hit Damage priority
+--- - `expr`: [Math Expression String](https://docs.hubos.dev/client/lua-api/defense-api/aux-prop#math-expression-strings), `"DAMAGE"` will represent the damage value for the current hit before any modifications.
+---
+--- The result of `expr` will be added to the total incoming damage.
+---
+--- If the result is negative, it will be clamped to 0.
+---@param expr string
+---@return AuxProp
+function AuxProp:decrease_pre_hit_damage(expr) end
 
 --- - Status Immunity priority
 --- - `hit_flags`: [Hit](https://docs.hubos.dev/client/lua-api/attack-api/hit-props#hit_propsflags)

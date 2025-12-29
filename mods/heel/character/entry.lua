@@ -132,7 +132,7 @@ local function create_spawn_action_factory(character)
       tile:reserve_for(spell)
     end
 
-    action:add_anim_action(7, function()
+    action:on_anim_frame(7, function()
       local virus = VIRUS_POOL[math.random(#VIRUS_POOL)]
       local team = character:team()
 
