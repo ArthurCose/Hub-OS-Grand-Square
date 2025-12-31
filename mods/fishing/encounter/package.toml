@@ -3,7 +3,11 @@ category = "encounter"
 id = "GrandSquare.Fishing.Encounter"
 
 [dependencies]
-libraries = ["BattleNetwork.Assets", "dev.konstinople.library.bomb"]
+libraries = [
+  "BattleNetwork.Assets",
+  "BattleNetwork4.TournamentIntro",
+  "dev.konstinople.library.bomb"
+]
 characters = [
   "BattleNetwork1.SharkMan.Enemy",
   "BattleNetwork4.Bass.Enemy",

@@ -237,4 +237,8 @@ function encounter_init(encounter, data)
   end
 
   Field.spawn(artifact, 0, 0)
+
+  if pool_index >= BOSS_POOL_START then
+    require("BattleNetwork4.TournamentIntro").init()
+  end
 end

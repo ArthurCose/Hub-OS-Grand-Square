@@ -21,6 +21,7 @@ local package_ids = {
   "dev.konstinople.library.timers",
   "BattleNetwork.Assets",
   "BattleNetwork.FallingRock",
+  "BattleNetwork4.TournamentIntro",
   "BattleNetwork6.Libraries.PanelGrab",
   "dev.konstinople.library.sword",
   "dev.konstinople.library.bomb",
