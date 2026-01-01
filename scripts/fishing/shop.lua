@@ -49,7 +49,15 @@ local HELP_DATA = {
   }
 }
 
+---@class BaitData
+---@field name string
+---@field description string
+---@field consumable boolean
+---@field price number
+---@field upgrade_price number[]
+
 local BAIT_IDS = { "bait:1", "bait:2", "bait:3", "bait:4", "bait:5" }
+---@type table<string, BaitData>
 FishingShop.BAIT_ITEM_MAP = {
   ["bait:1"] = {
     name = "url_slug",
@@ -108,7 +116,7 @@ for i = #BAIT_IDS, 1, -1 do
   local id = BAIT_IDS[i]
   local definition = FishingShop.BAIT_ITEM_MAP[id]
 
-  Net.register_item(id, definition)
+  Net.register_item(id, definition --[[@as Net.ItemDefinition]])
   item_description_map[id] = definition.description
   item_description_map[bait_upgrade_id(id)] = definition.name ..
       " Upgrade.\nIncreases " .. definition.name .. " Capacity by " .. BAIT_PER_UPGRADE .. "."
@@ -490,6 +498,32 @@ function FishingShop.handle_interaction(player_id)
 
     return nil
   end)
+end
+
+---@param bait_id string
+function FishingShop.next_bait(bait_id)
+  local bait_level = StringUtil.strip_prefix(bait_id, "bait:")
+  local next_level = tonumber(bait_level) + 1
+  local next_bait_id = "bait:" .. next_level
+
+  if not FishingShop.BAIT_ITEM_MAP[next_bait_id] then
+    return nil
+  end
+
+  return next_bait_id
+end
+
+---@param bait_id string
+function FishingShop.prev_bait(bait_id)
+  local bait_level = StringUtil.strip_prefix(bait_id, "bait:")
+  local next_level = tonumber(bait_level) - 1
+  local next_bait_id = "bait:" .. next_level
+
+  if not FishingShop.BAIT_ITEM_MAP[next_bait_id] then
+    return nil
+  end
+
+  return next_bait_id
 end
 
 return FishingShop

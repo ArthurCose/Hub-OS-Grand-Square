@@ -120,6 +120,93 @@ Net:on("object_interaction", function(event)
   end
 end)
 
+---expects to run in an async scope
+---@param player_id Net.ActorId
+---@parma player_data PlayerFishingData
+local function resolve_bait(player_id, player_data)
+  local bait_id = player_data.selected_bait
+  local bait_count = player_data.inventory[bait_id] or 0
+  local bait_item = FishingShop.BAIT_ITEM_MAP[bait_id]
+
+  local initial_bait_item = bait_item
+
+  if not bait_item then
+    -- invalid bait?
+    warn("invalid bait: " .. bait_id)
+    return nil
+  end
+
+  if bait_count > 0 then
+    -- resolve bait
+    return bait_id, bait_item, bait_count
+  end
+
+  -- fallback
+
+  local initial_id = bait_id
+
+  -- try the next best bait
+  while bait_id do
+    bait_id = FishingShop.next_bait(bait_id)
+    bait_count = player_data.inventory[bait_id] or 0
+
+    if bait_count > 0 then
+      bait_item = FishingShop.BAIT_ITEM_MAP[bait_id]
+      break
+    end
+  end
+
+  -- try worse bait
+  if not bait_id then
+    bait_id = initial_id
+
+    while bait_id do
+      bait_id = FishingShop.prev_bait(bait_id)
+      bait_count = player_data.inventory[bait_id] or 0
+
+      if bait_count > 0 then
+        bait_item = FishingShop.BAIT_ITEM_MAP[bait_id]
+        break
+      end
+    end
+  end
+
+  local mug = Net.get_player_mugshot(player_id)
+
+  if not bait_id or bait_count <= 0 then
+    Net.message_player(
+      player_id,
+      "We're out of bait.",
+      mug.texture_path,
+      mug.animation_path
+    )
+
+    return nil
+  end
+
+  Net.message_player(
+    player_id,
+    "We're out of " .. initial_bait_item.name .. " bait.",
+    mug.texture_path,
+    mug.animation_path
+  )
+
+  local response = Async.await(Async.question_player(
+    player_id,
+    "Switch to " .. bait_item.name .. "?",
+    mug.texture_path,
+    mug.animation_path
+  ))
+
+  if response ~= 1 then
+    return nil
+  end
+
+  player_data.selected_bait = bait_id
+
+  return bait_id, bait_item, bait_count
+end
+
 Net:on("tile_interaction", function(event)
   local player_id = event.player_id
 
@@ -152,24 +239,9 @@ Net:on("tile_interaction", function(event)
       return nil
     end
 
-    local bait_id = player_data.selected_bait
-    local bait_count = player_data.inventory[bait_id] or 0
-    local bait_item = FishingShop.BAIT_ITEM_MAP[bait_id]
+    local bait_id, bait_item, bait_count = resolve_bait(player_id, player_data)
 
-    if not bait_item then
-      -- invalid bait?
-      warn("invalid bait: " .. bait_id)
-      return nil
-    end
-
-    if bait_count <= 0 then
-      local mug = Net.get_player_mugshot(player_id)
-      Net.message_player(
-        player_id,
-        "We're out of " .. bait_item.name .. " bait.",
-        mug.texture_path,
-        mug.animation_path
-      )
+    if not bait_id or not bait_item or not bait_count then
       return nil
     end
 
