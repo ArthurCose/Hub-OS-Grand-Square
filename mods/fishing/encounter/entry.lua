@@ -18,20 +18,21 @@ local cragger_rare2 = { id = cragger_id, rank = Rank.Rare2 }
 
 local pool_weights = {
   -- bait level 1
-  { 7, 1, 0, 0, 0, 1 / 500 * 8, 0 },
+  { 7, 1, 0, 0, 0, 0,      0,     0,      1 / 500 * 8, 0 },
   -- bait level 2
-  { 1, 2, 0, 0, 0, 1 / 250 * 3, 0 },
+  { 1, 2, 0, 0, 0, 0,      0,     0,      1 / 250 * 3, 0 },
   -- bait level 3
-  { 0, 1, 4, 0, 0, 1 / 100 * 5, 0 },
+  { 0, 1, 4, 0, 0, 0,      0,     0,      1 / 100 * 5, 0 },
   -- bait level 4
-  { 0, 1, 4, 5, 0, 1 / 50 * 10, 0 },
+  { 0, 1, 4, 5, 0, 1 / 8,  0,     0,      1 / 50 * 10, 0 },
   -- bait level 5
-  { 0, 0, 1, 6, 2, 1 / 25 * 9,  1 / 100 * 9 },
+  { 0, 0, 1, 6, 2, 1 / 16, 1 / 8, 0,      1 / 25 * 9,  1 / 100 * 9 },
   -- bait level 6
-  { 0, 0, 0, 5, 3, 1 / 10 * 8,  1 / 20 * 8 },
+  { 0, 0, 0, 5, 3, 1 / 16, 1 / 8, 1 / 16, 1 / 10 * 8,  1 / 20 * 8 },
 }
 
-local BOSS_POOL_START = 6
+local RARE_POOL_START = 6
+local BOSS_POOL_START = 9
 
 local enemy_pools = {
   -- unlocked at bait level 1
@@ -69,6 +70,28 @@ local enemy_pools = {
     { piranha_v2,    piranha_rare1, cragger_v2, },
     { piranha_sp,    piranha_rare2, cragger_rare1, cragger_rare2 },
     { piranha_rare2, cragger_v3,    cragger_rare1 },
+  },
+
+  -- rare for bait level 4+
+  {
+    { piranha_v3, piranha_v2, piranha_v3, piranha_v2, piranha_v3, piranha_v2 },
+    { piranha_v2, piranha_v3, piranha_v2, piranha_v3, piranha_v2, piranha_v3 },
+    { piranha_v2, piranha_v3, piranha_sp, piranha_v3, piranha_v2, piranha_v3 },
+  },
+
+  -- rare for bait level 5+
+  {
+    { piranha_rare1, piranha_sp, piranha_rare1, piranha_sp, piranha_rare1, piranha_sp },
+    { piranha_rare1, piranha_v3, piranha_v3,    piranha_v3, piranha_v3 },
+    { piranha_v1,    piranha_v2, piranha_v3,    piranha_sp, piranha_rare1, piranha_rare2 },
+  },
+
+  -- rare for bait level 6+
+  {
+    { piranha_rare2, piranha_rare2, piranha_rare2, piranha_rare2 },
+    { piranha_rare1, piranha_rare1, piranha_rare1, piranha_rare1 },
+    { piranha_rare1, piranha_rare1, piranha_rare1, piranha_rare2 },
+    { piranha_rare1, piranha_rare2, piranha_rare1, piranha_rare2, piranha_rare1, piranha_rare2, piranha_rare1 }
   },
 
   -- rare chance for a boss fight
@@ -143,7 +166,7 @@ function encounter_init(encounter, data)
   local blue_start = 4
   local blue_end = Field.width() - 2
 
-  if (pool_index >= 3 and #enemies <= 3) or pool_index >= BOSS_POOL_START then
+  if (pool_index >= 3 and #enemies <= 3) or pool_index >= RARE_POOL_START then
     -- increase enemy space to increase difficulty
     blue_start = blue_start - 1
   end
