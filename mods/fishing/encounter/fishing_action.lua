@@ -120,7 +120,11 @@ local function create_reeling_action(user, fish, success_callback)
   local fight_timer = 0
   local max_fight_time = 0
   reeling_step.on_update_func = function()
-    if fish:deleted() or (not artifact:is_moving() and artifact:current_tile() ~= fish_tile) then
+    if
+        fish:deleted()
+        or (not artifact:is_moving() and artifact:current_tile() ~= fish_tile)
+        or fish:current_tile():y() ~= user:current_tile():y()
+    then
       Resources.play_audio(SNAP_SFX)
       action:end_action()
       return
