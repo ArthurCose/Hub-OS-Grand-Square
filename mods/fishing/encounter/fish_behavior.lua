@@ -1,6 +1,7 @@
 ---@class GrandSquare.Fishing.FishData
 ---@field name string
 ---@field rank string
+---@field special boolean?
 ---@field slide_timing [number, number][] at most 2 should be defined
 ---@field fight_timing [number, number][] at most 2 should be defined, fish can't fight at the furthest distance
 
@@ -53,6 +54,7 @@ fish_behavior.SharkMan = {
   [Rank.V1] = {
     name = "SharkMan",
     rank = "V1",
+    special = true,
     slide_timing = { { 25, 30 }, { 20, 25 } },
     fight_timing = { { 2, 5 }, { 1, 3 } },
   },
@@ -62,6 +64,7 @@ fish_behavior.Bass = {
   [Rank.V1] = {
     name = "Bass",
     rank = "V1",
+    special = true,
     slide_timing = { { 6, 8 }, { 4, 8 } },
     fight_timing = { { 1, 3 }, { 1, 1 } },
   },

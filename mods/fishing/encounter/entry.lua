@@ -195,11 +195,43 @@ function encounter_init(encounter, data)
   artifact.on_update_func = function()
     artifact:delete()
 
+    local fishies = Field.find_characters(function(c)
+      return
+          c:team() ~= Team.Red and
+          c:element() == Element.Aqua and
+          c:hittable() and
+          c:remaining_status_time(Hit.HookFish) == 0
+    end)
+
+    local function count_remaining_fish()
+      local count = 0
+
+      for _, fish in ipairs(fishies) do
+        if not fish:will_erase_eof() then
+          count = count + 1
+        end
+      end
+
+      return count
+    end
+
     Field.find_players(function(player)
       local component = player:create_component(Lifetime.ActiveBattle)
       local time_since_action = 0
+      local fish_caught = 0
 
       component.on_update_func = function()
+        if count_remaining_fish() == 0 then
+          if fish_caught > 0 then
+            encounter:end_scene()
+          else
+            encounter:lose()
+          end
+
+          component:eject()
+          return
+        end
+
         if player:has_actions() then
           time_since_action = 0
           return
@@ -226,7 +258,18 @@ function encounter_init(encounter, data)
             rank = fish_data.rank
           })
 
-          encounter:end_scene()
+          if fish_caught == 0 then
+            TurnGauge.set_time(TurnGauge.time() // 2)
+            TurnGauge.set_max_time(TurnGauge.max_time() // 2)
+          end
+
+          fish_caught = fish_caught + 1
+
+          if fish_data.special or count_remaining_fish() == 0 then
+            encounter:end_scene()
+          else
+            TurnGauge.set_enabled(true)
+          end
         end)
 
         player:queue_action(action)

@@ -277,70 +277,106 @@ Net:on("tile_interaction", function(event)
     end
 
     -- handle results
-    local fish_data
+    ---@type { name: string, rank: string }[]
+    local fishies = {}
 
     event_emitter:on("battle_message", function(event)
-      fish_data = event.data
+      fishies[#fishies + 1] = event.data
     end)
 
     event_emitter:on("battle_results", function()
-      if not fish_data then return end
+      if #fishies == 0 then return end
 
-      local fish_name = fish_data.name
-      local rank = fish_data.rank
+      -- resolve money earned
+      local earned = 0
 
-      local rank_sell_prices = SellPrices[fish_name]
+      for i = #fishies, 1, -1 do
+        local fish = fishies[i]
+        local fish_name = fish.name
+        local rank = fish.rank
 
-      if not rank_sell_prices then
-        warn("bad data from client: ", fish_data)
-        return
+        local rank_sell_prices = SellPrices[fish_name]
+
+        if not rank_sell_prices then
+          warn("caught invalid fish: ", fish)
+          table.remove(fishies, i)
+          goto continue
+        end
+
+        local sell_price = rank_sell_prices[rank]
+
+        if not sell_price then
+          warn("caught invalid fish: ", fish)
+          table.remove(fishies, i)
+          goto continue
+        end
+
+        earned = earned + sell_price
+        ::continue::
       end
 
-      local sell_price = rank_sell_prices[rank]
+      -- update stats
+      for _, fish in ipairs(fishies) do
+        local fish_name = fish.name
+        local rank = fish.rank
 
-      if not sell_price then
-        warn("bad data from client: ", fish_data)
-        return
+        local rank_counts = player_data.fish_caught[fish_name]
+
+        if not rank_counts then
+          rank_counts = {}
+          player_data.fish_caught[fish_name] = rank_counts
+        end
+
+        rank_counts[rank] = (rank_counts[rank] or 0) + 1
       end
 
-      player_data.money = player_data.money + sell_price
-
-      local rank_counts = player_data.fish_caught[fish_name]
-
-      if not rank_counts then
-        rank_counts = {}
-        player_data.fish_caught[fish_name] = rank_counts
-      end
-
-      rank_counts[rank] = (rank_counts[rank] or 0) + 1
-
+      player_data.money = player_data.money + earned
       player_data:save(player_id)
       Net.set_player_money(player_id, player_data.money)
 
-      Leaderboard.add_points(player_id, sell_price)
+      Leaderboard.add_points(player_id, earned)
       Leaderboard.save()
 
       Async.create_scope(function()
         -- display visuals to the player
-        local fish_sprite = Net.create_sprite({
-          parent_id = player_id,
-          texture_path = "/server/assets/ui/fish.png",
-          animation_path = "/server/assets/ui/fish.animation",
-          animation = fish_name .. "_" .. rank
-        })
+        ---@type Net.SpriteId | nil
+        local fish_sprite
 
-        Async.await(Async.sleep(2))
+        for i, fish in ipairs(fishies) do
+          local fish_name = fish.name
+          local rank = fish.rank
+
+          Net.synchronize(function()
+            if fish_sprite then
+              Net.delete_sprite(fish_sprite)
+            end
+
+            fish_sprite = Net.create_sprite({
+              parent_id = player_id,
+              texture_path = "/server/assets/ui/fish.png",
+              animation_path = "/server/assets/ui/fish.animation",
+              animation = fish_name .. "_" .. rank
+            })
+          end)
+
+          if i == #fishies then
+            -- linger longer on the last fish
+            Async.await(Async.sleep(2))
+          end
+        end
 
         local text_sprite
 
         Net.synchronize(function()
-          Net.delete_sprite(fish_sprite)
+          if fish_sprite then
+            Net.delete_sprite(fish_sprite)
+          end
 
           text_sprite = Net.create_text_sprite({
             parent_id = player_id,
             parent_point = "EMOTE",
             y = -4,
-            text = tostring(sell_price),
+            text = tostring(earned),
             text_style = {
               font = "MENU_TITLE",
               shadow_color = { r = 50, g = 50, b = 50 },
