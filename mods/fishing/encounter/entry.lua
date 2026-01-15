@@ -305,6 +305,8 @@ function encounter_init(encounter, data)
   Field.spawn(artifact, 0, 0)
 
   if pool_index >= BOSS_POOL_START then
-    require("BattleNetwork4.TournamentIntro").init()
+    local TournamentIntro = require("BattleNetwork4.TournamentIntro")
+    TournamentIntro.LINE_COLOR = Color.new(0, 0, 255)
+    TournamentIntro.init()
   end
 end
