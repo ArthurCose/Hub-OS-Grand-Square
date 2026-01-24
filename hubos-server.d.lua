@@ -2,6 +2,9 @@
 -- https://luals.github.io/wiki/annotations/
 ---@diagnostic disable: missing-return, unused-local
 
+--- Similar to print, but for errors.
+function printerr(...) end
+
 ---@class Net.ActorId
 
 ---@class Net.SpriteId
@@ -12,6 +15,7 @@
 Net.EventEmitter = {}
 
 ---@class Net.Promise<T>: { and_then: fun(callback: fun(value: T)) }
+---@class Net.Promise: { and_then: fun(callback: fun()) }
 
 ---@class Net.Position
 ---@field x number
@@ -72,6 +76,7 @@ Net.EventEmitter = {}
 ---@field texture_path? string
 ---@field animation_path? string
 ---@field animation? string
+---@field loop_animation? string
 ---@field x? number
 ---@field y? number
 ---@field z? number
@@ -147,6 +152,8 @@ Net.EventEmitter = {}
 ---@field texture_path string
 ---@field animation_path? string
 ---@field animation? string Animation state, this state will be looped.
+---@field loop_animation? boolean
+
 ---@class Net.TextSpriteOptions
 ---@field player_id? Net.ActorId Restricts visibility to this specific player if set.
 ---@field parent_id "widget" | "hud" | Net.ActorId
@@ -163,6 +170,8 @@ Net.EventEmitter = {}
 ---@field h_align? "left" | "center" | "right"
 ---@field v_align? "top" | "center" | "bottom"
 
+---@class Net.ReferOptions
+---@field unless_installed? boolean
 
 --- All fields are in the range: [0, 255]
 ---@class Net.Color
@@ -221,7 +230,8 @@ Async = {}
 ---@class Net: Net.EventEmitter
 Net = {}
 
---- Constructs a new EventEmitter instance.
+--- Returns [Net.EventEmitter](https://docs.hubos.dev/server/lua-api/event-emitters)
+---@return Net.EventEmitter
 function Net.EventEmitter.new() end
 
 --- Parameters after `event_name` are custom and passed to event listeners.
@@ -937,7 +947,7 @@ function Net.animate_sprite(sprite_id, state_name, loop) end
 
 --- Deletes the the sprite.
 ---@param sprite_id Net.SpriteId
-function Net.delete_sprite(sprite_id) end
+function Net.remove_sprite(sprite_id) end
 
 --- - `color`: [Net.Color](https://docs.hubos.dev/server/lua-api/widgets#netcolor)
 ---
@@ -969,7 +979,8 @@ function Net.refer_server(player_id, name, address) end
 --- Opens a menu on the client for the player to view and install a package from their preferred package repo.
 ---@param player_id Net.ActorId
 ---@param package_id string
-function Net.refer_package(player_id, package_id) end
+---@param refer_options? Net.ReferOptions
+function Net.refer_package(player_id, package_id, refer_options) end
 
 --- Gets permission from the player to permanently install a package on their client, allowing for the package to be used when disconnected and while on other servers.
 ---
@@ -1652,7 +1663,7 @@ function Net.provide_asset_for_player(player_id, path) end
 
 --- Similar to [Net.provide_asset_for_player](https://docs.hubos.dev/server/lua-api/assets#netprovide_asset_for_playerplayer_id-path), but also loads the package on the client.
 ---
---- This does not "install" packages on the client. Use [Net.offer_package()](https://docs.hubos.dev/server/lua-api/widgets#netoffer_packageplayer_id-package_path) or [Net.refer_package()](https://docs.hubos.dev/server/lua-api/widgets#netrefer_packageplayer_id-package_id) for that use case.
+--- This does not "install" packages on the client. Use [Net.offer_package()](https://docs.hubos.dev/server/lua-api/widgets#netoffer_packageplayer_id-package_path) or [Net.refer_package()](https://docs.hubos.dev/server/lua-api/widgets#netrefer_packageplayer_id-package_id-refer_options) for that use case.
 ---
 --- Calling in response to `player_request` will cause cached files on the client to be ignored.
 ---@param player_id Net.ActorId
@@ -1764,6 +1775,13 @@ function Async.await_all(promises) end
 ---@return Net.Promise<T>
 function Async.create_scope(callback) end
 
+--- Similar to [`Async.create_scope<T>()`](https://docs.hubos.dev/server/lua-api/async#asynccreate_scopetfunction-t)
+---
+--- Returns a promise.
+---@param callback fun()
+---@return Net.Promise<nil>
+function Async.create_scope(callback) end
+
 --- Returns a function that returns a promise, which resolves to the return value.
 ---
 --- ```lua
@@ -1777,8 +1795,15 @@ function Async.create_scope(callback) end
 --- say_after("world", 10).and_then(print) -- says "world" after 10s
 --- ```
 ---@generic T
----@param callback fun(...): T|nil
+---@param callback fun(...): T
 ---@return fun(...): Net.Promise<T>
+function Async.create_function(callback) end
+
+--- Similar to [`Async.create_function<T>()`](https://docs.hubos.dev/server/lua-api/async#asynccreate_functiontfunction-t)
+---
+--- Returns a promise.
+---@param callback fun()
+---@return Net.Promise<nil>
 function Async.create_function(callback) end
 
 --- - `request_options`: [Net.RequestOptions](https://docs.hubos.dev/server/lua-api/async#netrequestoptions)

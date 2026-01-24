@@ -348,7 +348,7 @@ Net:on("tile_interaction", function(event)
 
           Net.synchronize(function()
             if fish_sprite then
-              Net.delete_sprite(fish_sprite)
+              Net.remove_sprite(fish_sprite)
             end
 
             fish_sprite = Net.create_sprite({
@@ -369,7 +369,7 @@ Net:on("tile_interaction", function(event)
 
         Net.synchronize(function()
           if fish_sprite then
-            Net.delete_sprite(fish_sprite)
+            Net.remove_sprite(fish_sprite)
           end
 
           text_sprite = Net.create_text_sprite({
@@ -389,7 +389,7 @@ Net:on("tile_interaction", function(event)
 
         Async.await(Async.sleep(2))
 
-        Net.delete_sprite(text_sprite)
+        Net.remove_sprite(text_sprite)
 
         return nil
       end)
