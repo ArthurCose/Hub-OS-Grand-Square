@@ -193,6 +193,10 @@ function encounter_init(encounter, data)
 
   for _, enemy in ipairs(enemies) do
     while true do
+      if #tile_pool == 0 then
+        break
+      end
+
       local tile = table.remove(tile_pool, math.random(#tile_pool))
       local x = tile:x()
 
