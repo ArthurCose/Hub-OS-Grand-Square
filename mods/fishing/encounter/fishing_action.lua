@@ -133,6 +133,7 @@ local function create_reeling_action(user, fish, success_callback)
     if not artifact:is_moving() and distance == 0 then
       success = true
       action:end_action()
+      return
     end
 
     -- refresh status
