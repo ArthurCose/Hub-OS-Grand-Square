@@ -99,13 +99,19 @@ FishingShop.BAIT_ITEM_MAP = {
   }
 }
 
-local MOD_ITEM_IDS = { "mod:fish_chip" }
+local MOD_ITEM_IDS = { "mod:fish_chip", "mod:flock_chip" }
 local MOD_ITEMS = {
   ["mod:fish_chip"] = {
     name = "Fish",
     description = "Toss a\nfish onto\nthe field",
-    price = 4500,
+    price = 2000,
     package_id = "GrandSquare.Cards.Fish"
+  },
+  ["mod:flock_chip"] = {
+    name = "Flock",
+    description = "Swarm with Beat",
+    price = 2500,
+    package_id = "GrandSquare.Cards.Flock"
   },
 }
 
