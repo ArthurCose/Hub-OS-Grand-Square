@@ -17,6 +17,8 @@ local GREETINGS = {
   "Welcome.",
 }
 
+local NEED_MORE_ZENNY_MESSAGE = "Come back when you have more zenny."
+
 local THANK_MESSAGE = "Thank you for your purchase."
 
 local LEAVE_MESSAGE = "Thanks for stopping by!"
@@ -244,7 +246,7 @@ local function resolve_bait_purchase_count(data, item_id)
   if item.price == 0 then
     affordable_count = BAIT_PER_PURCHASE
   else
-    affordable_count = data.money // item.price
+    affordable_count = math.max(data.money // item.price, 1)
   end
 
   return math.max(math.min(max_capacity - bait_count, BAIT_PER_PURCHASE, affordable_count), 0)
@@ -274,6 +276,7 @@ end
 ---@param success_callback fun() called before saving
 local function try_purchase(player_id, data, price, success_callback)
   if data.money < price then
+    Net.message_player(player_id, NEED_MORE_ZENNY_MESSAGE, MUG_TEXTURE, MUG_ANIM_PATH)
     return
   end
 
