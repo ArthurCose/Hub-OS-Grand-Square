@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.2" orientation="isometric" renderorder="right-down" compressionlevel="0" width="36" height="24" tilewidth="64" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="123">
+<map version="1.10" tiledversion="1.11.2" orientation="isometric" renderorder="right-down" compressionlevel="0" width="36" height="24" tilewidth="64" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="123">
  <properties>
   <property name="Background Animation" value="/server/assets/bg.animation"/>
   <property name="Background Texture" value="/server/assets/bg.png"/>
-  <property name="Background Vel X" type="float" value="0.5"/>
-  <property name="Background Vel Y" type="float" value="0.25"/>
   <property name="Name" value="Grand Square"/>
   <property name="Song" value=""/>
  </properties>

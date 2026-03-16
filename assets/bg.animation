@@ -1,5 +1,6 @@
 animation state="DEFAULT"
 frame duration="20f" x="0" y="0" w="100" h="126"
+point label="VELOCITY" x="0.5" y="0.25"
 frame duration="20f" x="100" y="0" w="100" h="126"
 frame duration="20f" x="200" y="0" w="100" h="126"
 frame duration="20f" x="300" y="0" w="100" h="126"
