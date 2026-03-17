@@ -285,17 +285,16 @@ function encounter_init(encounter, data)
             rank = fish_data.rank
           })
 
-          if fish_caught == 0 then
-            TurnGauge.set_time(TurnGauge.time() // 2)
-            TurnGauge.set_max_time(TurnGauge.max_time() // 2)
-          end
-
           fish_caught = fish_caught + 1
 
           if fish_data.special or count_remaining_fish() == 0 then
             encounter:end_scene()
           else
             TurnGauge.set_enabled(true)
+
+            -- reset time with a faster clock to allow chained catches
+            TurnGauge.set_time(0)
+            TurnGauge.set_max_time(512 // 3)
           end
         end)
 
