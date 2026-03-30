@@ -93,7 +93,8 @@ Net:on("player_connect", function(event)
 end)
 
 Net:on("player_disconnect", function(event)
-  loaded_data[event.player_id] = nil
+  local identity = Net.get_player_secret(event.player_id)
+  loaded_data[identity] = nil
 end)
 
 return PlayerFishingData
