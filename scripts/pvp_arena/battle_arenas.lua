@@ -122,7 +122,7 @@ function BattleArena:try_reset()
   -- reset timer animations
   Net.synchronize(function()
     for _, bot_id in ipairs(self.countdown_bots) do
-      Net.animate_bot(bot_id, "DEFAULT")
+      Net.animate_actor(bot_id, "DEFAULT")
     end
   end)
 
@@ -175,7 +175,7 @@ function BattleArena:try_start()
   -- animate bots to display timer
   Net.synchronize(function()
     for _, bot_id in ipairs(self.countdown_bots) do
-      Net.animate_bot(bot_id, "COUNTDOWN")
+      Net.animate_actor(bot_id, "COUNTDOWN")
     end
   end)
 
@@ -201,15 +201,15 @@ function BattleArena:try_start()
     Net.synchronize(function()
       -- fight! instead of the timer
       for _, bot_id in ipairs(self.countdown_bots) do
-        Net.animate_bot(bot_id, "FIGHT")
+        Net.animate_actor(bot_id, "FIGHT")
       end
 
       -- make players face opponents
       for _, player_id in ipairs(red_players) do
         Net.lock_player_input(player_id)
-        Net.animate_player_properties(player_id, {
+        Net.animate_actor_properties(player_id, {
           {
-            properties = { { property = "Direction", value = "DOWN RIGHT" } },
+            properties = { { property = "Direction", value = "DOWN RIGHT", ease = "Ceil" } },
             duration = 1
           }
         })
@@ -217,9 +217,9 @@ function BattleArena:try_start()
 
       for _, player_id in ipairs(blue_players) do
         Net.lock_player_input(player_id)
-        Net.animate_player_properties(player_id, {
+        Net.animate_actor_properties(player_id, {
           {
-            properties = { { property = "Direction", value = "UP LEFT" } },
+            properties = { { property = "Direction", value = "UP LEFT", ease = "Ceil" } },
             duration = 1
           }
         })
@@ -262,7 +262,7 @@ function BattleArena:launch_player(tracked_player, x, y)
 
   local duration = 0.3
 
-  Net.animate_player_properties(tracked_player.id, {
+  Net.animate_actor_properties(tracked_player.id, {
     {
       properties = {
         { property = "Direction", value = facing_direction }
@@ -424,14 +424,14 @@ Net:on("player_area_transfer", function(event)
   local tracked_player = tracked_players[event.player_id]
 
   if tracked_player then
-    tracked_player.area = Net.get_player_area(event.player_id)
+    tracked_player.area = Net.get_actor_area(event.player_id)
     leave_arena(tracked_player)
     leave_arena(tracked_player)
   end
 end)
 
 Net:on("player_move", function(event)
-  local position = Net.get_player_position(event.player_id)
+  local position = Net.get_actor_position(event.player_id)
   local tile_x = math.floor(position.x)
   local tile_y = math.floor(position.y)
   local tile_z = math.floor(position.z)
@@ -441,7 +441,7 @@ Net:on("player_move", function(event)
   if not tracked_player then
     tracked_players[event.player_id] = {
       id = event.player_id,
-      area = Net.get_player_area(event.player_id),
+      area = Net.get_actor_area(event.player_id),
       x = position.x,
       y = position.x,
       tile_x = tile_x,

@@ -210,7 +210,7 @@ end
 Net:on("tile_interaction", function(event)
   local player_id = event.player_id
 
-  if Net.get_player_area(player_id) ~= area_id or Net.is_player_busy(player_id) then
+  if Net.get_actor_area(player_id) ~= area_id or Net.is_player_busy(player_id) then
     return
   end
 

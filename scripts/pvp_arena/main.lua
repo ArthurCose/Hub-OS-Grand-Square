@@ -24,7 +24,7 @@ local function add_spectator_detection(arena)
         goto continue
       end
 
-      local x, y, z = Net.get_player_position_multi(player_id)
+      local x, y, z = Net.get_actor_position_multi(player_id)
 
       local x_floored = math.floor(x)
 

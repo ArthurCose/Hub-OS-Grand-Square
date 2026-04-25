@@ -70,7 +70,7 @@ function FishingLeaderboard.add_points(player_id, points)
   end
 
   -- update name
-  data.name = Net.get_player_name(player_id)
+  data.name = Net.get_actor_name(player_id)
   -- update points
   data.points = data.points + points
 end

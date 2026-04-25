@@ -55,7 +55,7 @@ local function conversation_end(bot_id)
 
   if bot_data.conversation_count == 0 then
     bot_data.conversation_count = 0
-    Net.set_bot_direction(bot_id, bot_data.default_direction)
+    Net.set_actor_direction(bot_id, bot_data.default_direction)
   end
 end
 
@@ -68,9 +68,9 @@ Net:on("actor_interaction", function(event)
   end
 
   -- face the player
-  local player_position = Net.get_player_position(event.player_id)
-  local bot_position = Net.get_bot_position(event.actor_id)
-  Net.set_bot_direction(event.actor_id, Direction.diagonal_from_points(bot_position, player_position))
+  local player_position = Net.get_actor_position(event.player_id)
+  local bot_position = Net.get_actor_position(event.actor_id)
+  Net.set_actor_direction(event.actor_id, Direction.diagonal_from_points(bot_position, player_position))
 
 
   if Ampstr.serious(event.player_id) then
