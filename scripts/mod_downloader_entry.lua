@@ -11,6 +11,7 @@ local package_ids = {
   "BattleNetwork6.Libraries.HitDamageJudge",
   "dev.konstinople.library.timers",
   "BattleNetwork.Assets",
+  "BattleNetwork6.Statuses.EnemyAlert",
   "BattleNetwork4.TournamentIntro",
   "BattleNetwork6.Libraries.PanelGrab",
   "dev.konstinople.library.sword",
