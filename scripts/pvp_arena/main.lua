@@ -1,71 +1,125 @@
-local BattleArenas = require("scripts/pvp_arena/battle_arenas")
+local BattleArenas = require("scripts/libs/battle_arenas")
 
 local area_id = "default"
 
----@param arena BattleArena
-local function add_spectator_detection(arena)
-  local center_x_floored = math.floor(arena.center_x)
-  local center_y_floored = math.floor(arena.center_y)
-
-  arena.event_emitter:on("battle_start", function()
-    local seen = {}
-
-    for _, value in ipairs(arena.red_players) do
-      seen[value] = true
-    end
-
-    for _, value in ipairs(arena.blue_players) do
-      seen[value] = true
-    end
-
-    for _, player_id in ipairs(Net.list_players(arena.area_id)) do
-      if seen[player_id] then
-        -- already taking part in battle
-        goto continue
-      end
-
-      local x, y, z = Net.get_actor_position_multi(player_id)
-
-      local x_floored = math.floor(x)
-
-      if x_floored < center_x_floored - 1 or x_floored > center_x_floored + 1 or arena.z ~= math.floor(z) then
-        goto continue
-      end
-
-      local y_floored = math.floor(y)
-
-      if y_floored ~= center_y_floored - 2 and y_floored ~= center_y_floored + 1 then
-        goto continue
-      end
-
-      arena.gray_players[#arena.gray_players + 1] = player_id
-
-      ::continue::
-    end
-  end)
-end
-
 -- init arenas
 local function track_arenas()
-  local area_width = Net.get_layer_width(area_id)
-  local area_height = Net.get_layer_height(area_id)
-  local area_layer_count = Net.get_layer_count(area_id)
+  for _, object_id in ipairs(Net.list_objects(area_id)) do
+    local object = Net.get_object_by_id(area_id, object_id)
 
-  local arena_tileset = Net.get_tileset(area_id, "/server/assets/tiles/battle_arena.tsx")
-  local top_tile_gid = arena_tileset.first_gid + 1
-
-  for z = 0, area_layer_count - 1 do
-    for y = 0, area_height - 1 do
-      for x = 0, area_width - 1 do
-        local tile = Net.get_tile(area_id, x, y, z)
-
-        if tile.gid == top_tile_gid then
-          local arena = BattleArenas.create_arena(area_id, x, y, z)
-          arena:set_encounter_package("/server/mods/pvp_arena")
-          add_spectator_detection(arena)
-        end
-      end
+    if object.name ~= "Arena" then
+      goto continue
     end
+
+    local x = object.x
+    local y = object.y
+    local w = object.width
+    local h = object.height
+    local z = object.z
+
+    local bottom = object.y + object.height
+
+    local team_ranges = {
+      {
+        team = "red",
+        face_direction = "DOWN RIGHT",
+        x = x,
+        y = y,
+        z = z,
+        w = w / 2,
+        h = h
+      },
+      {
+        team = "blue",
+        face_direction = "UP LEFT",
+        x = x + w / 2,
+        y = y,
+        z = z,
+        w = w / 2,
+        h = h
+      },
+      {
+        team = "spectators",
+        face_direction = "DOWN LEFT",
+        x = x,
+        y = y - 1,
+        z = z,
+        w = w,
+        h = 1
+      },
+      {
+        team = "spectators",
+        face_direction = "UP RIGHT",
+        x = x,
+        y = bottom,
+        z = z,
+        w = w,
+        h = 1
+      },
+    }
+
+    local arena = BattleArenas.create_arena(area_id, {
+      area_id = area_id,
+      encounter_path = object.custom_properties.Encounter,
+      x = object.x,
+      y = object.y,
+      w = object.width,
+      h = object.height,
+      z = object.z,
+      team_ranges = team_ranges,
+      required_teams = { "red", "blue" }
+    })
+
+    arena.events:on("eject_player", function(event)
+      ---@type BattleArena.TeamRange
+      local team_range = event.team_range
+
+      if team_range.team == "spectators" then
+        return
+      end
+
+      ---@type Net.ActorId
+      local player_id = event.player_id
+      ---@type number, number
+      local y, z = event.y, team_range.z
+
+      local facing_direction = team_range.face_direction
+      local target_x
+
+      if facing_direction == "DOWN RIGHT" then
+        target_x = team_range.x + team_range.w - 3
+      else
+        target_x = team_range.x + 3
+      end
+
+      target_x = target_x + math.random() * 0.4
+
+      local duration = 0.3
+
+      Net.animate_actor_properties(player_id, {
+        {
+          properties = {
+            { property = "Direction", value = Net.get_actor_direction(player_id) }
+          }
+        },
+        {
+          properties = {
+            { property = "Z", value = z + 1, ease = "In" }
+          },
+          duration = duration * 0.75
+        },
+        {
+          properties = {
+            { property = "X", value = target_x, ease = "Linear" },
+            { property = "Y", value = y,        ease = "Linear" },
+            { property = "Z", value = z,        ease = "In" }
+          },
+          duration = duration
+        }
+      })
+    end)
+
+    ::continue::
   end
 end
 

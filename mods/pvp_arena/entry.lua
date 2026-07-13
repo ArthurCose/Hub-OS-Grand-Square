@@ -2,17 +2,93 @@ local HitDamageJudge = require("BattleNetwork6.Libraries.HitDamageJudge")
 local SpectatorFun = require("dev.konstinople.library.spectator_fun")
 local Timers = require("dev.konstinople.library.timers")
 
-local spawn_pattern = {
-  { 2, 2 }, -- center
-  { 1, 3 }, -- bottom left
-  { 1, 1 }, -- top left
-  { 3, 3 }, -- bottom right
-  { 3, 1 }, -- top right
-  { 1, 2 }, -- back
-  { 3, 2 }, -- front
-  { 2, 1 }, -- top
-  { 2, 3 }, -- bottom
-}
+local function create_player_spawn_resolver()
+  local spawn_pattern = {
+    { 2, 2 }, -- center
+    { 1, 3 }, -- bottom left
+    { 1, 1 }, -- top left
+    { 3, 3 }, -- bottom right
+    { 3, 1 }, -- top right
+    { 1, 2 }, -- back
+    { 3, 2 }, -- front
+    { 2, 1 }, -- top
+    { 2, 3 }, -- bottom
+  }
+
+  local red_attempts = 0
+  local blue_attempts = 0
+
+  ---@param team Team
+  return function(team)
+    while true do
+      local spawn_index
+
+      if team == Team.Blue then
+        spawn_index = blue_attempts
+        blue_attempts = blue_attempts + 1
+      else
+        spawn_index = red_attempts
+        red_attempts = red_attempts + 1
+      end
+
+      spawn_index = spawn_index % #spawn_pattern + 1
+
+      local position = spawn_pattern[spawn_index]
+      local x, y = position[1], position[2]
+
+      if team == Team.Blue then
+        -- mirror
+        x = 7 - x
+      end
+
+      local tile = Field.tile_at(x, y)
+
+      if not tile then
+        goto continue
+      end
+
+      if tile:is_walkable() and not tile:is_reserved() then
+        return x, y
+      end
+
+      if team == Team.Blue then
+        tile = tile:get_tile(Direction.Right, 1)
+      else
+        tile = tile:get_tile(Direction.Left, 1)
+      end
+
+      if tile and tile:is_walkable() and not tile:is_reserved() then
+        return tile:x(), tile:y()
+      end
+
+      ::continue::
+    end
+  end
+end
+
+---@param encounter Encounter
+---@param teams { team: string, player_count: number }[]
+---@param callback fun(index: number, team_name: string?)
+local function for_players_in_teams(encounter, teams, callback)
+  local team = teams[1]
+  local remaining = (team and team.player_count) or 0
+  local next_team_i = 2
+
+  for i = 0, encounter:player_count() - 1 do
+    while team and remaining == 0 do
+      team = teams[next_team_i]
+      next_team_i = next_team_i + 1
+
+      if team then
+        remaining = team.player_count
+      end
+    end
+
+    callback(i, team and team.team)
+    remaining = remaining - 1
+  end
+end
+
 
 ---@param encounter Encounter
 function encounter_init(encounter, data)
@@ -27,32 +103,28 @@ function encounter_init(encounter, data)
 
   encounter:set_spectate_on_delete(true)
 
-  local active_player_count = data.red_player_count + data.blue_player_count
+  local active_player_count = 0
 
-  for i = 0, encounter:player_count() - 1 do
-    if i < active_player_count then
-      local spawn_index = i
-      local is_blue = i >= data.red_player_count
+  local resolve_spawn = create_player_spawn_resolver()
 
-      if is_blue then
-        spawn_index = spawn_index - data.red_player_count
-      end
+  for_players_in_teams(encounter, data.teams, function(i, team_name)
+    if team_name == "red" or team_name == "blue" then
+      active_player_count = active_player_count + 1
 
-      spawn_index = spawn_index % #spawn_pattern + 1
+      local team
 
-      local position = spawn_pattern[spawn_index]
-
-      if is_blue then
-        -- blue (mirror)
-        encounter:spawn_player(i, 7 - position[1], position[2])
+      if team_name == "blue" then
+        team = Team.Blue
       else
-        -- red
-        encounter:spawn_player(i, position[1], position[2])
+        team = Team.Red
       end
+
+      local x, y = resolve_spawn(team)
+      encounter:spawn_player(i, x, y)
     else
       encounter:mark_spectator(i)
     end
-  end
+  end)
 
   if active_player_count > 2 then
     -- prevent enemy teams from owning certain columns in a multibattle
