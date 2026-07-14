@@ -658,7 +658,6 @@ end)
 
 Net:on("battle_results", function(event)
   local tracked_player = tracked_players[event.player_id]
-  print("battle completed for " .. event.player_id .. " " .. tostring(tracked_player ~= nil))
 
   if not tracked_player then
     return
