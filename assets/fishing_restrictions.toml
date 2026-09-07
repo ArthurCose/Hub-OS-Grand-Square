@@ -1,3 +1,8 @@
 [packages]
-id_blacklist = ["BattleNetwork3.Program02.BreakBuster"]
+id_blacklist = [
+  "BattleNetwork3.Program02.BreakBuster",
+  "com.AuraC.player.CopyAura", # Aura spamming navi
+  "com.AuraC.card.LifeAur3", # 250 HP life aura
+
+]
 tag_blacklist = ["OFFLINE_ONLY"]
