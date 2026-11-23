@@ -174,6 +174,10 @@ Net.EventEmitter = {}
 ---@field h_align? "left" | "center" | "right"
 ---@field v_align? "top" | "center" | "bottom"
 
+---@class Net.FreeCamOptions
+---@field speed? number defaults to 4
+---@field fast_speed? number defaults to 8
+
 ---@class Net.ReferOptions
 ---@field unless_installed? boolean
 
@@ -1064,14 +1068,14 @@ function Net.include_actor_for_player(player_id, actor_id) end
 ---@param emote_id string
 function Net.exclusive_actor_emote_for_player(player_id, emoter_id, emote_id) end
 
---- - `range_x`: number
---- - `range_y`: number
----
---- Not implemented. Subject to change.
+--- Switches the player's movement control to camera control.
 ---@param player_id Net.ActorId
----@param range_x? number
----@param range_y? number
-function Net.enable_camera_controls(player_id, range_x, range_y) end
+---@param free_cam_options? Net.FreeCamOptions
+function Net.enable_camera_controls(player_id, free_cam_options) end
+
+--- Disables free control of the camera by the player.
+---@param player_id Net.ActorId
+function Net.disable_camera_controls(player_id) end
 
 --- Snaps the camera to a specific position.
 ---
@@ -1154,7 +1158,7 @@ function Net.unlock_player_movement(player_id) end
 ---
 --- [deck]
 ---@param player_id Net.ActorId
----@param path string
+---@param path? string
 function Net.set_player_restrictions(player_id, path) end
 
 --- Returns true if the player is in a server sent battle, or if a board, shop, or textbox is open.
@@ -1498,14 +1502,14 @@ function Net.warp_actor(actor_id, x, y, z, direction) end
 --- ```lua
 --- local x, y, z = Net.get_actor_position_multi(actor_id)
 --- ```
----@param player_id Net.ActorId
+---@param actor_id Net.ActorId
 ---@param area_id string
 ---@param warp_in? boolean
 ---@param x? number
 ---@param y? number
 ---@param z? number
 ---@param direction? string
-function Net.transfer_actor(player_id, area_id, warp_in, x, y, z, direction) end
+function Net.transfer_actor(actor_id, area_id, warp_in, x, y, z, direction) end
 
 --- Returns [Net.TextureAnimationPair](https://docs.hubos.dev/server/lua-api/widgets#nettextureanimationpair)
 ---@param actor_id Net.ActorId
@@ -1589,6 +1593,10 @@ function Net.animate_actor(actor_id, state_name, loop) end
 ---@param actor_id Net.ActorId
 ---@param keyframes Net.ActorKeyframe[]
 function Net.animate_actor_properties(actor_id, keyframes) end
+
+--- Returns a list of asset paths.
+---@return string[]
+function Net.list_assets() end
 
 --- - `content`: `string`
 ---
@@ -1961,7 +1969,7 @@ function Net.print_to(player_id, any) end
 ---@param any any
 function Net.warn_to(player_id, any) end
 
---- Logs a warning to the specified user, or the console if nil.
+--- Logs an error to the specified user, or the console if nil.
 ---@param player_id? Net.ActorId
 ---@param any any
 function Net.error_to(player_id, any) end
